@@ -5,27 +5,34 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
 )
 
-func sayhelloName(w http.ResponseWriter, r *http.Request) {
+func homePage(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm() //Parse url parameters passed, then parse the response packet for the POST body (request body)
 	// attention: If you do not call ParseForm method, the following data can not be obtained form
 	fmt.Println(r.Form) // print information on server side.
-	fmt.Println("path", r.URL.Path)
-	fmt.Println("scheme", r.URL.Scheme)
-	fmt.Println(r.Form["url_long"])
-	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ""))
+	fmt.Println("method", r.Method)
+	fmt.Println("method:", r.Method) //get request method
+	if r.Method == "GET" {
+		t, err := template.ParseFiles("../Front-End/homepage.html")
+		if err != nil {
+			log.Fatal("ListenAndServe: ", err)
+		}
+		t.Execute(w, nil)
+	} else {
+		r.ParseForm()
+		// logic part of log in
+		fmt.Println("PIN", r.Form["PIN"])
 	}
-	fmt.Fprintf(w, "Hello astaxie!") // write data to response
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) //get request method
 	if r.Method == "GET" {
-		t, _ := template.ParseFiles("Front-End/login.html")
+		t, err := template.ParseFiles("../Front-End/login.html")
+		if err != nil {
+			log.Fatal("ListenAndServe: ", err)
+		}
 		t.Execute(w, nil)
 	} else {
 		r.ParseForm()
@@ -36,9 +43,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", sayhelloName) // setting router rule
+	port := 9090
+	http.HandleFunc("/", homePage) // setting router rule
 	http.HandleFunc("/login", login)
-	err := http.ListenAndServe(":9090", nil) // setting listening port
+	log.Printf("Listening on Port %d", port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil) // setting listening port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
