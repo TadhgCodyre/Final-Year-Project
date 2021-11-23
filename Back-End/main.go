@@ -24,6 +24,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		r.ParseForm()
 		// logic part of log in
+		if len(r.Form["PIN"][0]) == 0 {
+			fmt.Println("Not a PIN")
+		}
 		fmt.Println("PIN", r.Form["PIN"])
 	}
 }
