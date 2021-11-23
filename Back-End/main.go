@@ -1,10 +1,12 @@
 package main
 
 import (
+	"Final-Year-Project/Back-End/models"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {
@@ -37,8 +39,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	} else {
 		r.ParseForm()
 		// logic part of log in
-		fmt.Println("username:", r.Form["username"])
-		fmt.Println("password:", r.Form["password"])
+		quizMaster := models.QuizMaster{Username: strings.Join(r.Form["username"],""), Password: strings.Join(r.Form["password"],"")}
+		fmt.Println(quizMaster.ID,", ",quizMaster.Username, ", ", quizMaster.Password)
 	}
 }
 
