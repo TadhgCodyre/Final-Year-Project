@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Final-Year-Project/Back-End/middleware"
 	"Final-Year-Project/Back-End/models"
 	"fmt"
 	"html/template"
@@ -43,7 +44,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		// logic part of log in
 		quizMaster := models.QuizMaster{Username: strings.Join(r.Form["username"],""), Password: strings.Join(r.Form["password"],"")}
-		fmt.Println(quizMaster.ID,", ",quizMaster.Username, ", ", quizMaster.Password)
+		middleware.CreateAccount(quizMaster)
+		//fmt.Println(quizMaster.ID,", ",quizMaster.Username, ", ", quizMaster.Password)
 	}
 }
 
