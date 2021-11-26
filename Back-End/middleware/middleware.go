@@ -4,65 +4,140 @@ import (
 	"Final-Year-Project/Back-End/models"
 	"Final-Year-Project/utils"
 	"context"
+	"crypto/sha256"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"time"
 )
 
-var collection *mongo.Collection
+//type (
+//	mongoClient func() *options.ClientOptions
+//	mongoConnect func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error)
+//	sha256New func() hash.Hash
+//	jsonMarshal func(v interface{}) ([]byte, error)
+//	fileRead func(filename string) ([]byte, error)
+//	yamlUnmarshal func(in []byte, out interface{}) (err error)
+//)
+//
+//type Dependencies struct {
+//	mongoClient mongoClient
+//	mongoConnect mongoConnect
+//	sha256New sha256New
+//	jsonMarshal jsonMarshal
+//	fileRead fileRead
+//	yamlUnmarshal yamlUnmarshal
+//}
 
-func init() {
+//var service Dependencies
+var quizMastersCollection *mongo.Collection
+var ctx context.Context
+
+//func init() {
+//	client := options.Client
+//	connect := mongo.Connect
+//	shaNew := sha256.New
+//	marshal := json.Marshal
+//	read := ioutil.ReadFile
+//	unmarshal := yaml.Unmarshal
+//
+//	service = Dependencies{
+//		mongoClient: client,
+//		mongoConnect: connect,
+//		sha256New: shaNew,
+//		fileRead: read,
+//		jsonMarshal: marshal,
+//		yamlUnmarshal: unmarshal,
+//	}
+//
+//	service.databaseConnect()
+//}
+//
+//func ServiceSetup() Dependencies {
+//	client := options.Client
+//	connect := mongo.Connect
+//	shaNew := sha256.New
+//	marshal := json.Marshal
+//	read := ioutil.ReadFile
+//	unmarshal := yaml.Unmarshal
+//
+//	service = Dependencies{
+//		mongoClient: client,
+//		mongoConnect: connect,
+//		sha256New: shaNew,
+//		fileRead: read,
+//		jsonMarshal: marshal,
+//		yamlUnmarshal: unmarshal,
+//	}
+//
+//	return service
+//}
+
+func connectDatabase() {
 	data := readFile()
 	mongoDB := data["mongo"].(string)
-	clientOptions := options.Client().ApplyURI(mongoDB)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	client, err := mongo.Connect(ctx, clientOptions)
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDB))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
+	//defer client.Disconnect(ctx)
+
+	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Connected to MongoDB!")
 
-	collections := client.Database("TableQuiz")
-	fmt.Println(collections.Name())
+	tableQuizDatabase := client.Database("TableQuiz")
+	fmt.Println(tableQuizDatabase.Name())
+
+
+	quizMastersCollection = tableQuizDatabase.Collection("QuizMaster")
 }
 
-// Creates the account to insert into the database
-func CreateAccount(user models.QuizMaster) {
-	fmt.Println("Username: ", user.Username, "| Password: ", user.Password)
-	newAccount(user)
+// CreateAccount creates account to insert into the database
+func CreateAccount(account models.QuizMaster) {
+	connectDatabase()
+	account.Password = encryptPassword(account.Password)
+
+	newAccount(account)
 }
-//func CreateAccount(w http.ResponseWriter, r *http.Request) {
-//	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
-//	w.Header().Set("Access-Control-Allow-Origin", "*")
-//	w.Header().Set("Access-Control-Allow-Methods", "POST")
-//	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-//	var task models.QuizMaster
-//	_ = json.NewDecoder(r.Body).Decode(&task)
-//	// fmt.Println(task, r.Body)
-//	newAccount(task)
-//	json.NewEncoder(w).Encode(task)
-//}
+
+func encryptPassword(password string) string {
+	encrypt := sha256.New()
+	encrypt.Write([]byte(password))
+	password = fmt.Sprintf("%x", encrypt.Sum(nil))
+
+	return password
+}
 
 func newAccount(account models.QuizMaster) {
-	insertResult, err := collection.InsertOne(context.Background(), account)
-	utils.CheckErr(err)
+	fmt.Println(account.Username+"|"+account.Password)
+	quizMasterResult, err := quizMastersCollection.InsertOne(ctx, bson.D{
+		{Key: "username", Value: account.Username},
+		{Key: "password", Value: account.Password},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	fmt.Println("Inserted a Single Record ", insertResult.InsertedID)
+	fmt.Println("Inserted a Single Record ", quizMasterResult.InsertedID)
 }
 
 func readFile() map[string]interface{} {
-	file, err := ioutil.ReadFile("../utils/config.yaml")
+	file, err := ioutil.ReadFile ("../utils/config.yaml")
 	utils.CheckErr(err)
 
 	data := make(map[string]interface{})
