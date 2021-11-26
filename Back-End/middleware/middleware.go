@@ -7,86 +7,102 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsoncodec"
+	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
+	"go.mongodb.org/mongo-driver/x/mongo/driver"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/session"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"gopkg.in/yaml.v3"
+	"hash"
 	"io/ioutil"
 	"log"
 	"time"
 )
 
-//type (
-//	mongoClient func() *options.ClientOptions
-//	mongoConnect func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error)
-//	sha256New func() hash.Hash
-//	jsonMarshal func(v interface{}) ([]byte, error)
-//	fileRead func(filename string) ([]byte, error)
-//	yamlUnmarshal func(in []byte, out interface{}) (err error)
-//)
-//
-//type Dependencies struct {
-//	mongoClient mongoClient
-//	mongoConnect mongoConnect
-//	sha256New sha256New
-//	jsonMarshal jsonMarshal
-//	fileRead fileRead
-//	yamlUnmarshal yamlUnmarshal
-//}
+type Client struct {
+	id                uuid.UUID
+	topologyOptions   []topology.Option
+	deployment        driver.Deployment
+	localThreshold    time.Duration
+	retryWrites       bool
+	retryReads        bool
+	clock             *session.ClusterClock
+	readPreference    *readpref.ReadPref
+	readConcern       *readconcern.ReadConcern
+	writeConcern      *writeconcern.WriteConcern
+	registry          *bsoncodec.Registry
+	monitor           *event.CommandMonitor
+	serverAPI         *driver.ServerAPIOptions
+	serverMonitor     *event.ServerMonitor
+	sessionPool       *session.Pool
+	keyVaultClientFLE *Client
+	keyVaultCollFLE   *mongo.Collection
+	mongocryptdFLE    *mcryptClient
+	cryptFLE          driver.Crypt
+	metadataClientFLE *Client
+	internalClientFLE *Client
+}
 
-//var service Dependencies
+type mcryptClient struct {
+	bypassSpawn bool
+	client      *Client
+	path        string
+	spawnArgs   []string
+}
+
+type (
+	mongoClient func(opts ...*options.ClientOptions) (*mongo.Client, error)
+	mongoContext func(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc)
+	sha256New func() hash.Hash
+	fileRead func(filename string) ([]byte, error)
+	yamlUnmarshal func(in []byte, out interface{}) (err error)
+)
+
+type Dependencies struct {
+	mongoClient mongoClient
+	mongoContext mongoContext
+	sha256New sha256New
+	fileRead fileRead
+	yamlUnmarshal yamlUnmarshal
+}
+
+var service Dependencies
 var quizMastersCollection *mongo.Collection
 var ctx context.Context
 
-//func init() {
-//	client := options.Client
-//	connect := mongo.Connect
-//	shaNew := sha256.New
-//	marshal := json.Marshal
-//	read := ioutil.ReadFile
-//	unmarshal := yaml.Unmarshal
-//
-//	service = Dependencies{
-//		mongoClient: client,
-//		mongoConnect: connect,
-//		sha256New: shaNew,
-//		fileRead: read,
-//		jsonMarshal: marshal,
-//		yamlUnmarshal: unmarshal,
-//	}
-//
-//	service.databaseConnect()
-//}
-//
-//func ServiceSetup() Dependencies {
-//	client := options.Client
-//	connect := mongo.Connect
-//	shaNew := sha256.New
-//	marshal := json.Marshal
-//	read := ioutil.ReadFile
-//	unmarshal := yaml.Unmarshal
-//
-//	service = Dependencies{
-//		mongoClient: client,
-//		mongoConnect: connect,
-//		sha256New: shaNew,
-//		fileRead: read,
-//		jsonMarshal: marshal,
-//		yamlUnmarshal: unmarshal,
-//	}
-//
-//	return service
-//}
+func ServiceSetup() Dependencies {
+	client := mongo.NewClient
+	connect :=context.WithTimeout
+	shaNew := sha256.New
+	read := ioutil.ReadFile
+	unmarshal := yaml.Unmarshal
 
-func connectDatabase() {
-	data := readFile()
+	service = Dependencies{
+		mongoClient: client,
+		mongoContext: connect,
+		sha256New: shaNew,
+		fileRead: read,
+		yamlUnmarshal: unmarshal,
+	}
+
+	return service
+}
+
+func (m Dependencies) connectDatabase() {
+	data := m.readFile()
 	mongoDB := data["mongo"].(string)
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDB))
+	client, err := m.mongoClient(options.Client().ApplyURI(mongoDB))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ = m.mongoContext(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -101,30 +117,26 @@ func connectDatabase() {
 	fmt.Println("Connected to MongoDB!")
 
 	tableQuizDatabase := client.Database("TableQuiz")
-	fmt.Println(tableQuizDatabase.Name())
-
-
 	quizMastersCollection = tableQuizDatabase.Collection("QuizMaster")
 }
 
 // CreateAccount creates account to insert into the database
-func CreateAccount(account models.QuizMaster) {
-	connectDatabase()
-	account.Password = encryptPassword(account.Password)
+func (m Dependencies) CreateAccount(account models.QuizMaster) {
+	m.connectDatabase()
+	account.Password = m.encryptPassword(account.Password)
 
-	newAccount(account)
+	m.newAccount(account)
 }
 
-func encryptPassword(password string) string {
-	encrypt := sha256.New()
+func (m Dependencies) encryptPassword(password string) string {
+	encrypt := m.sha256New()
 	encrypt.Write([]byte(password))
 	password = fmt.Sprintf("%x", encrypt.Sum(nil))
 
 	return password
 }
 
-func newAccount(account models.QuizMaster) {
-	fmt.Println(account.Username+"|"+account.Password)
+func (m Dependencies) newAccount(account models.QuizMaster) {
 	quizMasterResult, err := quizMastersCollection.InsertOne(ctx, bson.D{
 		{Key: "username", Value: account.Username},
 		{Key: "password", Value: account.Password},
@@ -136,13 +148,13 @@ func newAccount(account models.QuizMaster) {
 	fmt.Println("Inserted a Single Record ", quizMasterResult.InsertedID)
 }
 
-func readFile() map[string]interface{} {
-	file, err := ioutil.ReadFile ("../utils/config.yaml")
+func (m Dependencies) readFile() map[string]interface{} {
+	file, err := m.fileRead("../utils/config.yaml")
 	utils.CheckErr(err)
 
 	data := make(map[string]interface{})
 
-	err = yaml.Unmarshal(file, &data)
+	err = m.yamlUnmarshal(file, &data)
 	utils.CheckErr(err)
 
 	return data

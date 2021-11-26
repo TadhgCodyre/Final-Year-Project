@@ -44,8 +44,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		// logic part of log in
 		quizMaster := models.QuizMaster{Username: strings.Join(r.Form["username"],""), Password: strings.Join(r.Form["password"],"")}
-		middleware.CreateAccount(quizMaster)
-		//fmt.Println(quizMaster.ID,", ",quizMaster.Username, ", ", quizMaster.Password)
+		service := middleware.ServiceSetup()
+		service.CreateAccount(quizMaster)
 	}
 }
 
