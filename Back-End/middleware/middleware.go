@@ -7,17 +7,9 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsoncodec"
-	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readconcern"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"go.mongodb.org/mongo-driver/mongo/writeconcern"
-	"go.mongodb.org/mongo-driver/x/mongo/driver"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/session"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/uuid"
 	"gopkg.in/yaml.v3"
 	"hash"
 	"io/ioutil"
@@ -25,84 +17,61 @@ import (
 	"time"
 )
 
-type Client struct {
-	id                uuid.UUID
-	topologyOptions   []topology.Option
-	deployment        driver.Deployment
-	localThreshold    time.Duration
-	retryWrites       bool
-	retryReads        bool
-	clock             *session.ClusterClock
-	readPreference    *readpref.ReadPref
-	readConcern       *readconcern.ReadConcern
-	writeConcern      *writeconcern.WriteConcern
-	registry          *bsoncodec.Registry
-	monitor           *event.CommandMonitor
-	serverAPI         *driver.ServerAPIOptions
-	serverMonitor     *event.ServerMonitor
-	sessionPool       *session.Pool
-	keyVaultClientFLE *Client
-	keyVaultCollFLE   *mongo.Collection
-	mongocryptdFLE    *mcryptClient
-	cryptFLE          driver.Crypt
-	metadataClientFLE *Client
-	internalClientFLE *Client
-}
-
-type mcryptClient struct {
-	bypassSpawn bool
-	client      *Client
-	path        string
-	spawnArgs   []string
-}
-
 type (
 	mongoClient func(opts ...*options.ClientOptions) (*mongo.Client, error)
-	mongoContext func(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc)
+	contextTimeout func(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc)
 	sha256New func() hash.Hash
 	fileRead func(filename string) ([]byte, error)
-	yamlUnmarshal func(in []byte, out interface{}) (err error)
+	Apply func(uri string) *options.ClientOptions
 )
 
 type Dependencies struct {
 	mongoClient mongoClient
-	mongoContext mongoContext
+	contextTimeout contextTimeout
 	sha256New sha256New
 	fileRead fileRead
-	yamlUnmarshal yamlUnmarshal
+	Apply Apply
 }
 
-var service Dependencies
+var client Dependencies
 var quizMastersCollection *mongo.Collection
 var ctx context.Context
 
 func ServiceSetup() Dependencies {
-	client := mongo.NewClient
-	connect :=context.WithTimeout
+	service := mongo.NewClient
+	connect := context.WithTimeout
 	shaNew := sha256.New
 	read := ioutil.ReadFile
-	unmarshal := yaml.Unmarshal
+	uri := options.Client().ApplyURI
 
-	service = Dependencies{
-		mongoClient: client,
-		mongoContext: connect,
+	client = Dependencies{
+		mongoClient: service,
+		contextTimeout: connect,
 		sha256New: shaNew,
 		fileRead: read,
-		yamlUnmarshal: unmarshal,
+		Apply: uri,
 	}
 
-	return service
+	return client
+}
+
+// CreateAccount creates account to insert into the database
+func (m Dependencies) CreateAccount(account models.QuizMaster) {
+	m.connectDatabase()
+	account.Password = m.encryptPassword(account.Password)
+
+	m.newAccount(account)
 }
 
 func (m Dependencies) connectDatabase() {
 	data := m.readFile()
 	mongoDB := data["mongo"].(string)
 
-	client, err := m.mongoClient(options.Client().ApplyURI(mongoDB))
+	client, err := m.mongoClient(m.Apply(mongoDB))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, _ = m.mongoContext(context.Background(), 10*time.Second)
+	ctx, _ = m.contextTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -120,19 +89,14 @@ func (m Dependencies) connectDatabase() {
 	quizMastersCollection = tableQuizDatabase.Collection("QuizMaster")
 }
 
-// CreateAccount creates account to insert into the database
-func (m Dependencies) CreateAccount(account models.QuizMaster) {
-	m.connectDatabase()
-	account.Password = m.encryptPassword(account.Password)
-
-	m.newAccount(account)
-}
-
 func (m Dependencies) encryptPassword(password string) string {
-	encrypt := m.sha256New()
-	encrypt.Write([]byte(password))
-	password = fmt.Sprintf("%x", encrypt.Sum(nil))
+	encrypt := sha256.New()
+	_, err := encrypt.Write([]byte(password))
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	password = fmt.Sprintf("%x", encrypt.Sum(nil))
 	return password
 }
 
@@ -154,7 +118,7 @@ func (m Dependencies) readFile() map[string]interface{} {
 
 	data := make(map[string]interface{})
 
-	err = m.yamlUnmarshal(file, &data)
+	err = yaml.Unmarshal(file, &data)
 	utils.CheckErr(err)
 
 	return data
