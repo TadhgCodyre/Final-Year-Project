@@ -1,7 +1,7 @@
-package middleware
+package login
 
 import (
-	"Final-Year-Project/Back-End/middleware/mocks"
+	mocks2 "Final-Year-Project/Back-End/middleware/login/mocks"
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,11 +34,11 @@ func mockNewClient(opts ...*options.ClientOptions) (*mongo.Client, error) {
 }
 
 func mockContextTimeout(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
-	return &mocks.Context{}, nil
+	return &mocks2.Context{}, nil
 }
 
 func mockSha256New() hash.Hash {
-	return &mocks.Hash{}
+	return &mocks2.Hash{}
 }
 
 func mockReadFile(filename string) ([]byte, error) {
@@ -49,11 +49,11 @@ var mockService Dependencies
 
 func init() {
 	mockService = Dependencies{
-		mongoClient: mockNewClient,
+		mongoClient:    mockNewClient,
 		contextTimeout: mockContextTimeout,
-		sha256New: mockSha256New,
-		fileRead: mockReadFile,
-		Apply: mockApplyURI,
+		sha256New:      mockSha256New,
+		fileRead:       mockReadFile,
+		Apply:          mockApplyURI,
 	}
 }
 

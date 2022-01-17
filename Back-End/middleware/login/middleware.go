@@ -1,4 +1,4 @@
-package middleware
+package login
 
 import (
 	"Final-Year-Project/Back-End/models"
@@ -26,11 +26,11 @@ type (
 )
 
 type Dependencies struct {
-	mongoClient mongoClient
+	mongoClient    mongoClient
 	contextTimeout contextTimeout
-	sha256New sha256New
-	fileRead fileRead
-	Apply Apply
+	sha256New      sha256New
+	fileRead       fileRead
+	Apply          Apply
 }
 
 var client Dependencies
