@@ -1,12 +1,10 @@
-package login
+package middleware
 
 import (
-	"Final-Year-Project/Back-End/models"
 	"Final-Year-Project/utils"
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -34,7 +32,6 @@ type Dependencies struct {
 }
 
 var client Dependencies
-var quizMastersCollection *mongo.Collection
 var ctx context.Context
 
 func ServiceSetup() Dependencies {
@@ -55,15 +52,7 @@ func ServiceSetup() Dependencies {
 	return client
 }
 
-// CreateAccount creates account to insert into the database
-func (m Dependencies) CreateAccount(account models.QuizMaster) {
-	m.connectDatabase()
-	account.Password = m.encryptPassword(account.Password)
-
-	m.newAccount(account)
-}
-
-func (m Dependencies) connectDatabase() {
+func (m Dependencies) ConnectDatabase() (context.Context, *mongo.Client) {
 	data := m.readFile()
 	mongoDB := data["mongo"].(string)
 
@@ -85,31 +74,7 @@ func (m Dependencies) connectDatabase() {
 	}
 	fmt.Println("Connected to MongoDB!")
 
-	tableQuizDatabase := client.Database("TableQuiz")
-	quizMastersCollection = tableQuizDatabase.Collection("QuizMaster")
-}
-
-func (m Dependencies) encryptPassword(password string) string {
-	encrypt := sha256.New()
-	_, err := encrypt.Write([]byte(password))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	password = fmt.Sprintf("%x", encrypt.Sum(nil))
-	return password
-}
-
-func (m Dependencies) newAccount(account models.QuizMaster) {
-	quizMasterResult, err := quizMastersCollection.InsertOne(ctx, bson.D{
-		{Key: "username", Value: account.Username},
-		{Key: "password", Value: account.Password},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Inserted a Single Record ", quizMasterResult.InsertedID)
+	return ctx, client
 }
 
 func (m Dependencies) readFile() map[string]interface{} {

@@ -65,8 +65,7 @@ func setupQuiz(w http.ResponseWriter, r *http.Request) {
 
 		//sends  login data to mongoDB
 		quizMaster := models.QuizMaster{Username: r.FormValue("username"), Password: r.FormValue("password")}
-		service := quizLogin.ServiceSetup()
-		service.CreateAccount(quizMaster)
+		quizLogin.CreateAccount(quizMaster)
 
 		//displays quiz setup page
 		t, err := template.ParseFiles("../Front-End/quizSetup.html")

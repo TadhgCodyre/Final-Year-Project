@@ -1,7 +1,7 @@
-package login
+package middleware
 
 import (
-	mocks2 "Final-Year-Project/Back-End/middleware/login/mocks"
+	"Final-Year-Project/Back-End/middleware/mocks"
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,11 +34,11 @@ func mockNewClient(opts ...*options.ClientOptions) (*mongo.Client, error) {
 }
 
 func mockContextTimeout(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
-	return &mocks2.Context{}, nil
+	return &mocks.Context{}, nil
 }
 
 func mockSha256New() hash.Hash {
-	return &mocks2.Hash{}
+	return &mocks.Hash{}
 }
 
 func mockReadFile(filename string) ([]byte, error) {
@@ -49,24 +49,17 @@ var mockService Dependencies
 
 func init() {
 	mockService = Dependencies{
-		mongoClient:    mockNewClient,
+		mongoClient: mockNewClient,
 		contextTimeout: mockContextTimeout,
-		sha256New:      mockSha256New,
-		fileRead:       mockReadFile,
-		Apply:          mockApplyURI,
+		sha256New: mockSha256New,
+		fileRead: mockReadFile,
+		Apply: mockApplyURI,
 	}
 }
 
 //func Test_connectDatabase(t *testing.T) {
 //	mockService.connectDatabase()
 //}
-
-func Test_EncryptPassword(t *testing.T) {
-	mockPassword := mockService.encryptPassword("12345")
-	if mockPassword != "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5" {
-		t.Error(mockPassword)
-	}
-}
 
 func Test_readFile(t *testing.T) {
 	mockMap := mockService.readFile()
