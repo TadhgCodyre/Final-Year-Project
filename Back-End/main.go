@@ -1,7 +1,7 @@
 package main
 
 import (
-	quizLogin "Final-Year-Project/Back-End/middleware/login"
+	quizLogin "Final-Year-Project/Back-End/middleware/account"
 	"Final-Year-Project/Back-End/middleware/quizSetup"
 	"Final-Year-Project/Back-End/models"
 	"Final-Year-Project/utils"
@@ -47,14 +47,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 		t.Execute(w, nil)
 	} else {
-		//r.ParseForm()
-		//
-		//// logic part of log in
-		//fmt.Println("Test 1: ",r.Form)
-		//quizMaster := models.QuizMaster{Username: r.FormValue("username"), Password: r.FormValue("password")}
-		//fmt.Println("Test 2: ",quizMaster)
-		//service := quizLogin.ServiceSetup()
-		//service.CreateAccount(quizMaster)
+		r.ParseForm()
+
+		quizMaster := models.QuizMaster{Email: r.FormValue("email"), Password: r.FormValue("password")}
+		if !quizLogin.Login(quizMaster) {
+			fmt.Println("Wrong email or password, please try again")
+			t, err := template.ParseFiles("../Front-End/login.html")
+			if err != nil {
+				log.Fatal("ListenAndServe: ", err)
+			}
+			t.Execute(w, nil)
+		}
 	}
 }
 
@@ -63,8 +66,8 @@ func setupQuiz(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		r.ParseForm()
 
-		//sends  login data to mongoDB
-		quizMaster := models.QuizMaster{Username: r.FormValue("username"), Password: r.FormValue("password")}
+		//sends  account data to mongoDB
+		quizMaster := models.QuizMaster{Email: r.FormValue("email"),Username: r.FormValue("username"), Password:  r.FormValue("password")}
 		quizLogin.CreateAccount(quizMaster)
 
 		//displays quiz setup page

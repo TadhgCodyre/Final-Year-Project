@@ -3,13 +3,11 @@ package middleware
 import (
 	"Final-Year-Project/utils"
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/yaml.v3"
-	"hash"
 	"io/ioutil"
 	"log"
 	"time"
@@ -18,7 +16,6 @@ import (
 type (
 	mongoClient func(opts ...*options.ClientOptions) (*mongo.Client, error)
 	contextTimeout func(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc)
-	sha256New func() hash.Hash
 	fileRead func(filename string) ([]byte, error)
 	Apply func(uri string) *options.ClientOptions
 )
@@ -26,7 +23,6 @@ type (
 type Dependencies struct {
 	mongoClient    mongoClient
 	contextTimeout contextTimeout
-	sha256New      sha256New
 	fileRead       fileRead
 	Apply          Apply
 }
@@ -37,14 +33,12 @@ var ctx context.Context
 func ServiceSetup() Dependencies {
 	service := mongo.NewClient
 	connect := context.WithTimeout
-	shaNew := sha256.New
 	read := ioutil.ReadFile
 	uri := options.Client().ApplyURI
 
 	client = Dependencies{
 		mongoClient: service,
 		contextTimeout: connect,
-		sha256New: shaNew,
 		fileRead: read,
 		Apply: uri,
 	}
