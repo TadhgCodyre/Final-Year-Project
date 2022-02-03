@@ -1,0 +1,39 @@
+.App {
+  text-align: center;
+  background-image: url(./img/background.jpg) !important;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 100vw;
+  height: 100vh;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  color: #00ffff;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.title{
+  color: #00ffff;
+}
+
+.logo{
+  width: 150px;
+}
+
+.button{
+  background: #cb0bec;
+  color: #02f8f8;
+  border: 0;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}

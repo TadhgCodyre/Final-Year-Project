@@ -19,22 +19,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// DB connection string
-// for localhost mongoDB
-// const connectionString = "mongodb://localhost:8080"
-
-// Database Name
-const dbName = "TableQuiz"
-
-// Collection name
-const collName = "QuizMaster"
-
 // collection object/instance
 var collection *mongo.Collection
 var ctx context.Context
 
 // create connection with mongo db
-func init() {
+func connectDatabase() {
 	data := readFile()
 	connectionString := data["mongo"].(string)
 
@@ -71,6 +61,8 @@ func init() {
 
 // CreateAccount creates account to send to database
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
+	connectDatabase()
+
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
@@ -83,6 +75,20 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(task)
 }
 
+func Login(w http.ResponseWriter, r *http.Request){
+	connectDatabase()
+	fmt.Println("Check 1")
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	var task models.QuizMaster
+	_ = json.NewDecoder(r.Body).Decode(&task)
+	fmt.Println("Check 2")
+	task.Password = encryptPassword(task.Password)
+	checkAccount(task)
+	json.NewEncoder(w).Encode(task)
+}
+
 func encryptPassword(password string) string {
 	h, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -91,6 +97,25 @@ func encryptPassword(password string) string {
 
 	return string(h)
 }
+
+// Insert one task in the DB
+func insertAccount(account models.QuizMaster) {
+	fmt.Println(account)
+	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
+		{Key: "email", Value: account.Email},
+		{Key: "password", Value: account.Password},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Inserted a Single Record ", quizMasterResult.InsertedID)
+}
+
+func checkAccount(account models.QuizMaster) {
+	fmt.Println(account)
+}
+
 
 func readFile() map[string]interface{} {
 	file, err := ioutil.ReadFile("../utils/config.yaml")
@@ -103,7 +128,6 @@ func readFile() map[string]interface{} {
 
 	return data
 }
-
 //// TaskComplete update task route
 //func TaskComplete(w http.ResponseWriter, r *http.Request) {
 //
@@ -179,20 +203,6 @@ func readFile() map[string]interface{} {
 //	cur.Close(context.Background())
 //	return results
 //}
-
-// Insert one task in the DB
-func insertAccount(account models.QuizMaster) {
-	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
-		{Key: "email", Value: account.Email},
-		{Key: "username", Value: account.Username},
-		{Key: "password", Value: account.Password},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Inserted a Single Record ", quizMasterResult.InsertedID)
-}
 
 //// task complete method, update task's status to true
 //func taskComplete(task string) {

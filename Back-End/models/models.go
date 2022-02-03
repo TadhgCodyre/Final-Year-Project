@@ -5,7 +5,6 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type QuizMaster struct {
 	ID     primitive.ObjectID `bson:"_id,omitempty"`
 	Email 	   string 		  `bson:"email,omitempty"`
-	Username   string         `bson:"username,omitempty"`
 	Password   string         `bson:"password,omitempty"`
 }
 

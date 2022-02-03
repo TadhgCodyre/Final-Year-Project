@@ -10,7 +10,7 @@ func Router() *mux.Router {
 
 	router := mux.NewRouter()
 
-	//router.HandleFunc("/api/task", middleware.GetAllTask).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/sign-in", middleware.Login).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/sign-up", middleware.CreateAccount).Methods("POST", "OPTIONS")
 	//router.HandleFunc("/api/task/{id}", middleware.TaskComplete).Methods("PUT", "OPTIONS")
 	//router.HandleFunc("/api/undoTask/{id}", middleware.UndoTask).Methods("PUT", "OPTIONS")
