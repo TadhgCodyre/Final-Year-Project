@@ -1,5 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "./account.css"
+import {Link} from "react-router-dom";
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
@@ -36,7 +37,9 @@ const SignIn = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    <button>Sign In</button>
+                    <Link to={"quizSetup"}>
+                        <button>Sign In</button>
+                    </Link>
                 </form>
             </div>
     );

@@ -19,7 +19,6 @@ class PoolQuiz extends Component {
                         Pool Quiz
                     </div>
                 </Header>
-                <body>
                 <Link to={"signIn"}>
                     <Button variant="primary" className="button">Sign In</Button><br/>
                 </Link>
@@ -27,7 +26,6 @@ class PoolQuiz extends Component {
                 <Link to={"signUp"}>
                     <Button variant="primary" className="button">Sign Up</Button>
                 </Link>
-                </body>
             </div>
         )
     }

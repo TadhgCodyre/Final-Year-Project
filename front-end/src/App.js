@@ -9,6 +9,7 @@ import "./App.css";
 import PoolQuiz from "./web app/Pool-Quiz";
 import SignUp from "./web app/SignUp";
 import SignIn from "./web app/SignIn"
+import QuizSetup from "./web app/QuizSetup";
 
 function App() {
   return (
@@ -25,6 +26,9 @@ function App() {
                       </Route>
                       <Route exact path={"/signIn"}>
                           <SignIn />
+                      </Route>
+                      <Route exact path={"/quizSetup"}>
+                          <QuizSetup />
                       </Route>
                   </Switch>
               </div>
