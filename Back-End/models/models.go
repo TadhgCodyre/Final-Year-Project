@@ -8,12 +8,14 @@ type QuizMaster struct {
 	Password   string         `bson:"password,omitempty"`
 }
 
+type Question struct {
+	ID     primitive.ObjectID	`bson:"_id,omitempty"`
+	QuestionString string 		`bson:"questionString,omitempty"`
+	Answer map[string]bool			`bson:"answer,omitempty"`
+}
+
 type Quiz struct {
-	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	Name   string             `bson:"name,omitempty"`
-	NumberRounds int		  `bson:"rounds,omitempty"`
-	NumberQuestions int 	  `bson:"questions,omitempty"`
-	QuestionPool bool 		  `bson:"pool,omitempty"`
-	ContributeQuestions bool  `bson:"contribute,omitempty"`
-	QuickResponses bool 	  `bson:"quick,omitempty"`
+	ID     primitive.ObjectID 		`bson:"_id,omitempty"`
+	Name   string             		`bson:"name,omitempty"`
+	Questions map[int][]Question	`bson:"question,omitempty"`
 }

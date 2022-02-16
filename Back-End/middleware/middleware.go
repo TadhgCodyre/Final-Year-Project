@@ -89,20 +89,19 @@ func Login(w http.ResponseWriter, r *http.Request){
 // QuizSetup Sends quiz detials to database
 func QuizSetup(w http.ResponseWriter, r *http.Request){
 	client := connectDatabase()
-	fmt.Println("Check 1")
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 
-	var task models.Quiz
-	_ = json.NewDecoder(r.Body).Decode(&task)
-	fmt.Println("Check 2")
+	var quiz models.Quiz
+	_ = json.NewDecoder(r.Body).Decode(&quiz)
+	fmt.Println(quiz)
 
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
-	addQuiz(task, collection)
-	json.NewEncoder(w).Encode(task)
+	addQuiz(quiz, collection)
+	json.NewEncoder(w).Encode(quiz)
 }
 
 // Encrypts plaintext into ciphertext
@@ -134,14 +133,9 @@ func checkAccount(account models.QuizMaster, collection *mongo.Collection) {
 }
 
 func addQuiz(quiz models.Quiz, collection *mongo.Collection) {
-	fmt.Println(quiz)
 	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
 		{Key: "name", Value: quiz.Name},
-		{Key: "no. of rounds", Value: quiz.NumberRounds},
-		{Key: "no of questions", Value: quiz.NumberQuestions},
-		{Key: "use pool", Value: quiz.QuestionPool},
-		{Key: "contribute to pool", Value: quiz.ContributeQuestions},
-		{Key: "quick response", Value: quiz.QuickResponses},
+		{Key: "question", Value: quiz.Questions},
 	})
 	if err != nil {
 		log.Fatal(err)

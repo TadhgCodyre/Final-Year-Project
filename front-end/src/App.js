@@ -1,18 +1,17 @@
 import React from "react";
 import "./App.css";
-import Navbar from "./web app/Navbar"
+import Navbar from "./web app/Navbar";
 import { BrowserRouter as Router, Route, Switch} from "react-router-dom";
-// import the Container Component from the semantic-ui-react
-import { Container } from "semantic-ui-react";
-// import the ToDoList component
 import "./App.css";
+
 import PoolQuiz from "./web app/Pool-Quiz";
 import SignUp from "./web app/SignUp";
-import SignIn from "./web app/SignIn"
+import SignIn from "./web app/SignIn";
 import QuizSetup from "./web app/QuizSetup";
+import Questions from "./web app/Questions";
 
 function App() {
-  return (
+    return (
       <Router>
           <div className={"App"}>
               <Navbar />
@@ -29,6 +28,9 @@ function App() {
                       </Route>
                       <Route exact path={"/quizSetup"}>
                           <QuizSetup />
+                      </Route>
+                      <Route exact path={"/questions"}>
+                          <Questions />
                       </Route>
                   </Switch>
               </div>
