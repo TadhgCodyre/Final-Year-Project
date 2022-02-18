@@ -69,7 +69,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login Gets credentials from database to check for correct details
-func Login(w http.ResponseWriter, r *http.Request){
+func Login(w http.ResponseWriter, r *http.Request) {
 	client := connectDatabase()
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -77,7 +77,6 @@ func Login(w http.ResponseWriter, r *http.Request){
 
 	var task models.QuizMaster
 	_ = json.NewDecoder(r.Body).Decode(&task)
-	task.Password = encryptPassword(task.Password)
 
 	collection := client.Database("TableQuiz").Collection("QuizMaster")
 	fmt.Println("Collection instance created!")
@@ -87,7 +86,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 }
 
 // QuizSetup Sends quiz detials to database
-func QuizSetup(w http.ResponseWriter, r *http.Request){
+func QuizSetup(w http.ResponseWriter, r *http.Request) {
 	client := connectDatabase()
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -129,7 +128,21 @@ func insertAccount(account models.QuizMaster, collection *mongo.Collection) {
 
 // Checks if login credentials are correct
 func checkAccount(account models.QuizMaster, collection *mongo.Collection) {
-	fmt.Println(account)
+	//var returnedAccount []bson.M
+	var returnedAccount models.QuizMaster
+	err := collection.FindOne(ctx, bson.M{"email": account.Email}).Decode(&returnedAccount)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//temporary override
+	err = bcrypt.CompareHashAndPassword([]byte(returnedAccount.Password), []byte(account.Password))
+	if err != nil {
+		fmt.Println("false")
+		fmt.Println(err)
+	} else {
+		fmt.Println("true")
+	}
 }
 
 func addQuiz(quiz models.Quiz, collection *mongo.Collection) {
