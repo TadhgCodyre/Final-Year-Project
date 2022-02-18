@@ -16,6 +16,7 @@ const SignIn = () => {
             body: JSON.stringify(account)
         }).then(() => {
             console.log('logged in');
+            //window.location.replace("/quizSetup")
         })
     }
 
@@ -37,9 +38,7 @@ const SignIn = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    <Link to={"quizSetup"}>
-                        <button>Sign In</button>
-                    </Link>
+                    <button>Sign In</button>
                 </form>
             </div>
     );
