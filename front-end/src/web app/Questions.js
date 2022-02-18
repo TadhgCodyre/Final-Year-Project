@@ -1,9 +1,11 @@
 import ReactJSX, {Component, useState} from "react";
 import "./account.css"
 import * as React from 'react';
-import {Form, Tab} from "semantic-ui-react";
+import {Tab} from "semantic-ui-react";
 
 const Questions = () => {
+    const colors = '#02f8f8'
+
     const quiz = new Map();
 
     const state = {
@@ -21,26 +23,39 @@ const Questions = () => {
     //     { menuItem: 'Round 3', render: () => <Tab.Pane>{setupQuestions()}</Tab.Pane> },
     // ]
 
-    const questions = [];
+    //let questions = [];
     const [question, setQuestion] = useState('');
-    let questionArray = [];
-    const panes = []
+    //let questionArray = [];
 
     const setupRounds = () => {
-        const panes = []
+        const panes = [];
+        const questionArray = [];
         for (let j = 1; j < state.noRounds+1; j++) {
-            questionArray = []
             panes.push(
-                {menuItem: 'Round '+j, render: () => <Tab.Pane>{setupQuestions()}</Tab.Pane>}
-            )
-            quiz.set(j, questionArray)
+                {menuItem: 'Round '+j, render: () =>
+                        <Tab.Pane>
+                            <form onSubmit={addQuestions}>
+                                {setupQuestions(questionArray)}
+                                <button>Add Questions</button>
+                            </form>
+                        </Tab.Pane>}
+            );
+            quiz.set(j,questionArray);
         }
+        console.log("After submit: ", questionArray)
 
         return panes
     }
 
-    const setupQuestions = () => {
-        // const panes = []
+    const addQuestions = (state) => {
+        state.preventDefault()
+
+        console.log()
+    }
+
+    const setupQuestions = (questionArray) => {
+        const questions = [];
+        let j = 0
         for (let i = 0; i < state.noQuestions; i++) {
             questions.push(
                 <div>
@@ -48,7 +63,7 @@ const Questions = () => {
                     <input
                         id={i}
                         type={"text"}
-                        name={"Question" + i}
+                        name={"Round"+j+"Question" + i}
                         //"Round" + j +
                         required
                         onChange={(e) => {
@@ -57,21 +72,22 @@ const Questions = () => {
                                 ...question,
                                 [e.target.name]: value
                             });
-                        }
-                        }
+                        }}
                         //onChange={(e) => {alert("hello")}}
                         //questionsArray.push(e.target.value)
                     />
                 </div>
             );
-            questionArray.push(question)
-            // questions.map(question =>
-            //     <li key={i}>{question}</li>);
+            questionArray.push(question);
+            questions.map(question =>
+                <li key={i}>{question}</li>);
+            j += 1
         }
-        return questions
+
+        return questions;
     }
 
-    const TabExampleBasic = () => <Tab panes={setupRounds()} className={"create"}/>
+    const TabExampleBasic = () => <Tab panes={setupRounds()}  className={"create"}/>
 
     const handleQuestions = () => {
 
@@ -95,15 +111,12 @@ const Questions = () => {
         // })
     }
 
-    //window.onload = setupQuestions();
-
     return (
         <div className="create">
             <h2>Almost there! Just need to enter the questions</h2>
             <h2>{state.name}</h2>
             {TabExampleBasic()}
             <form onSubmit={handleSubmit}>
-
                 <br/>
                 <button>Setup Quiz</button>
             </form>

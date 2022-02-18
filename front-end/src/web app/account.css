@@ -38,11 +38,17 @@
     box-sizing: border-box;
     display: block;
 }
-.create button, Tab {
+.create button {
     background: #cb0bec;
     color: #02f8f8;
     border: 0;
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
+    display: flex;
 }
+
+/*.create .ui.attached.tabular.menu{*/
+/*    background: #cb0bec;*/
+/*    color: #02f8f8;*/
+/*}*/
