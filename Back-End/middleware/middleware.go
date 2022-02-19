@@ -50,6 +50,7 @@ func connectDatabase() *mongo.Client {
 
 // CreateAccount creates account to send to database
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.Method)
 	client := connectDatabase()
 
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
@@ -64,12 +65,18 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	collection := client.Database("TableQuiz").Collection("QuizMaster")
 	fmt.Println("Collection instance created!")
 
-	insertAccount(task, collection)
-	json.NewEncoder(w).Encode(task)
+	check := insertAccount(task, collection)
+	if check {
+		json.NewEncoder(w).Encode(task)
+	} else {
+		http.Error(w, "Email already exists", 500)
+	}
+
 }
 
 // Login Gets credentials from database to check for correct details
 func Login(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.Method)
 	client := connectDatabase()
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -81,12 +88,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	collection := client.Database("TableQuiz").Collection("QuizMaster")
 	fmt.Println("Collection instance created!")
 
-	checkAccount(task, collection)
-	json.NewEncoder(w).Encode(task)
+	check := checkAccount(task, collection)
+	if check {
+		json.NewEncoder(w).Encode(task)
+	} else {
+		http.Error(w, "Wrong Password", 500)
+	}
+
 }
 
 // QuizSetup Sends quiz detials to database
 func QuizSetup(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.Method)
 	client := connectDatabase()
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -114,34 +127,43 @@ func encryptPassword(password string) string {
 }
 
 // Insert one task in the DB
-func insertAccount(account models.QuizMaster, collection *mongo.Collection) {
+func insertAccount(account models.QuizMaster, collection *mongo.Collection) bool {
+	var returnedAccount models.QuizMaster
+	err := collection.FindOne(ctx, bson.M{"email": account.Email}).Decode(&returnedAccount)
+	if err == nil {
+		log.Print("Existing email found")
+		return false
+	}
+
 	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
 		{Key: "email", Value: account.Email},
 		{Key: "password", Value: account.Password},
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return false
 	}
 
 	fmt.Println("Inserted a Single Account Record ", quizMasterResult.InsertedID)
+	return true
 }
 
 // Checks if login credentials are correct
-func checkAccount(account models.QuizMaster, collection *mongo.Collection) {
+func checkAccount(account models.QuizMaster, collection *mongo.Collection) bool {
 	//var returnedAccount []bson.M
 	var returnedAccount models.QuizMaster
 	err := collection.FindOne(ctx, bson.M{"email": account.Email}).Decode(&returnedAccount)
 	if err != nil {
-		fmt.Println(err)
+		log.Print(err)
+		return false
 	}
 
 	//temporary override
 	err = bcrypt.CompareHashAndPassword([]byte(returnedAccount.Password), []byte(account.Password))
 	if err != nil {
-		fmt.Println("false")
-		fmt.Println(err)
+		return false
 	} else {
-		fmt.Println("true")
+		return true
 	}
 }
 
