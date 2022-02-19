@@ -7,6 +7,7 @@ const Questions = () => {
     const colors = '#02f8f8'
 
     const quiz = new Map();
+    const questionArray = new Map();
 
     const state = {
         name: localStorage.getItem("name"),
@@ -17,45 +18,36 @@ const Questions = () => {
         quick: localStorage.getItem("quick")
     };
 
-    // let panes = [
-    //     { menuItem: 'Round 1', render: () => <Tab.Pane>{setupQuestions()}</Tab.Pane> },
-    //     { menuItem: 'Round 2', render: () => <Tab.Pane>{setupQuestions()}</Tab.Pane> },
-    //     { menuItem: 'Round 3', render: () => <Tab.Pane>{setupQuestions()}</Tab.Pane> },
-    // ]
-
     //let questions = [];
     const [question, setQuestion] = useState('');
     //let questionArray = [];
 
-    const setupRounds = () => {
+    const setupRounds = (e) => {
         const panes = [];
-        const questionArray = [];
         for (let j = 1; j < state.noRounds+1; j++) {
             panes.push(
                 {menuItem: 'Round '+j, render: () =>
                         <Tab.Pane>
                             <form onSubmit={addQuestions}>
-                                {setupQuestions(questionArray)}
+                                {setupQuestions(j)}
                                 <button>Add Questions</button>
                             </form>
                         </Tab.Pane>}
             );
-            quiz.set(j,questionArray);
+            quiz.set(j, questionArray)
         }
-        console.log("After submit: ", questionArray)
 
         return panes
     }
 
-    const addQuestions = (state) => {
-        state.preventDefault()
-
-        console.log()
+    const addQuestions = (e) => {
+        e.preventDefault()
+        console.log(questionArray)
     }
 
-    const setupQuestions = (questionArray) => {
+    const setupQuestions = (j) => {
         const questions = [];
-        let j = 0
+
         for (let i = 0; i < state.noQuestions; i++) {
             questions.push(
                 <div>
@@ -73,16 +65,14 @@ const Questions = () => {
                                 [e.target.name]: value
                             });
                         }}
-                        //onChange={(e) => {alert("hello")}}
-                        //questionsArray.push(e.target.value)
                     />
                 </div>
             );
-            questionArray.push(question);
-            questions.map(question =>
-                <li key={i}>{question}</li>);
-            j += 1
         }
+        questionArray.set(j, question);
+
+        questions.map(question =>
+            <li key={j}>{question}</li>);
 
         return questions;
     }

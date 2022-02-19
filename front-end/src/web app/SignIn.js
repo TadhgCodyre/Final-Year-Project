@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./account.css"
-import {Link} from "react-router-dom";
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
@@ -14,9 +13,15 @@ const SignIn = () => {
             method: 'POST',
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: JSON.stringify(account)
-        }).then(() => {
-            console.log('logged in');
-            //window.location.replace("/quizSetup")
+        }).then((response) => {
+            console.log(response.ok);
+            if (!response.ok) {
+                alert("Wrong password or email, try again")
+            } else {
+                console.log("logged in")
+                localStorage.setItem("username", email.substring(0, email.indexOf("@")))
+                window.location.replace("/quizSetup")
+            }
         })
     }
 

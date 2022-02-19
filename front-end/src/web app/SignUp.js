@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./account.css"
-import {Link} from "react-router-dom";
 
 const SignUp = () => {
     const [email, setEmail] = useState('');
@@ -9,16 +8,20 @@ const SignUp = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const blog = { email, password};
-        console.log(blog)
 
         fetch('http://localhost:9090/api/sign-up', {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(blog)
-        }).then(() => {
-            console.log('new blog added');
-            //go to next page
-            window.location.replace("/quizSetup")
+        }).then((response) => {
+            if (!response.ok) {
+                alert("Email already in use, try another")
+            } else {
+                console.log('new blog added');
+                localStorage.setItem("username", email.substring(0, email.indexOf("@")))
+                window.location.replace("/quizSetup")
+            }
+
         })
     }
 
@@ -40,11 +43,9 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                {/*<Link to={"quizSetup"}>*/}
-                    <button>
-                            Sign Up
-                    </button>
-                {/*</Link>*/}
+                <button>
+                    Sign Up
+                </button>
                 </form>
             </div>
     );

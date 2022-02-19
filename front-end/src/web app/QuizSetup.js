@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import "./account.css"
-import Button from "react-bootstrap/Button";
-import {Link} from "react-router-dom";
-import Questions from "./Questions";
-import ReactDOM from "react-dom";
-import App from "../App";
 
 const QuizSetup = () => {
+    const state = {
+        username: localStorage.getItem("username")
+    }
+
     const [name, setName] = useState('');
     const [noRounds, setRounds] = useState(0);
     const [noQuestions, setQuestions] = useState(0);
@@ -38,16 +37,6 @@ const QuizSetup = () => {
 
         console.log(quiz);
 
-        // fetch('http://localhost:9090/api/quiz-setup', {
-        //     method: 'POST',
-        //     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        //     body: JSON.stringify(quiz)
-        // }).then(() => {
-        //     console.log('new quiz created');
-        //     // go to questions page
-        //     window.location.replace("/questions")
-        // })
-
         localStorage.setItem("name", quiz.Name, );
         localStorage.setItem("noRounds", quiz.NumberRounds.toString());
         localStorage.setItem("noQuestions", quiz.NumberQuestions.toString());
@@ -60,6 +49,7 @@ const QuizSetup = () => {
 
     return (
         <div className="create">
+            <h1>Welcome {state.username}!</h1>
             <h2>Time to setup the quiz!</h2>
             <form onSubmit={handleSubmit}>
                 <label>Quiz Name</label>
