@@ -22,7 +22,9 @@ const Questions = () => {
     const [question, setQuestion] = useState('');
     //let questionArray = [];
 
-    const setupRounds = (e) => {
+    const TabExampleBasic = () => <Tab panes={setupRounds()}  className={"create"}/>
+
+    const setupRounds = () => {
         const panes = [];
         for (let j = 1; j < state.noRounds+1; j++) {
             panes.push(
@@ -38,11 +40,6 @@ const Questions = () => {
         }
 
         return panes
-    }
-
-    const addQuestions = (e) => {
-        e.preventDefault()
-        console.log(questionArray)
     }
 
     const setupQuestions = (j) => {
@@ -77,7 +74,10 @@ const Questions = () => {
         return questions;
     }
 
-    const TabExampleBasic = () => <Tab panes={setupRounds()}  className={"create"}/>
+    const addQuestions = (e) => {
+        e.preventDefault()
+        console.log(questionArray)
+    }
 
     const handleQuestions = () => {
 
