@@ -7,7 +7,7 @@ const Questions = () => {
     const colors = '#02f8f8'
 
     const quiz = new Map();
-    const questionArray = new Map();
+    let questionMap = new Map();
 
     const state = {
         name: localStorage.getItem("name"),
@@ -26,7 +26,8 @@ const Questions = () => {
 
     const setupRounds = () => {
         const panes = [];
-        for (let j = 1; j < state.noRounds+1; j++) {
+
+        for (let j = 0; j < state.noRounds; j++) {
             panes.push(
                 {menuItem: 'Round '+j, render: () =>
                         <Tab.Pane>
@@ -36,7 +37,8 @@ const Questions = () => {
                             </form>
                         </Tab.Pane>}
             );
-            quiz.set(j, questionArray)
+            quiz.set(j, questionMap)
+            //for (let member in question) delete question[member]
         }
 
         return panes
@@ -44,6 +46,8 @@ const Questions = () => {
 
     const setupQuestions = (j) => {
         const questions = [];
+
+        //question.substring(0, question.indexOf(question));
 
         for (let i = 0; i < state.noQuestions; i++) {
             questions.push(
@@ -54,7 +58,7 @@ const Questions = () => {
                         type={"text"}
                         name={"Round"+j+"Question" + i}
                         //"Round" + j +
-                        required
+                        //required
                         onChange={(e) => {
                             const value = e.target.value;
                             setQuestion({
@@ -65,22 +69,34 @@ const Questions = () => {
                     />
                 </div>
             );
-        }
-        questionArray.set(j, question);
+            questionMap.set(i,question)
 
-        questions.map(question =>
-            <li key={j}>{question}</li>);
+            questions.map(question =>
+                <li key={j}>{question}</li>);
+        }
+        //console.log(question)
 
         return questions;
     }
 
     const addQuestions = (e) => {
         e.preventDefault()
-        console.log(questionArray)
-    }
-
-    const handleQuestions = () => {
-
+        console.log(question)
+        let temp = JSON.stringify(question)
+        let tempArray = temp.replace('{', '')
+        tempArray = tempArray.replace('}', '')
+        let tempArray1 = tempArray.split(",")
+        if (tempArray1.length > 2) {
+            for (let i = 0; i < 2; i++) {
+                tempArray1.shift()
+            }
+        }
+        console.log(tempArray1)
+        // for (let i = 0; i < question.length; i++) {
+        //     questionMap.set(i, question)
+        // }
+        console.log(questionMap)
+        //for (let member in question) delete question[member]
     }
 
     const handleSubmit = (e) => {
