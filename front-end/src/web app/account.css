@@ -1,11 +1,11 @@
-.form {
-    background-image: url(../img/background.jpg);
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    width: 100vw;
-    height: 100vh;
-}
+/*.form {*/
+/*    background-image: url(../img/background.jpg);*/
+/*    background-position: center;*/
+/*    background-size: cover;*/
+/*    background-repeat: no-repeat;*/
+/*    width: 100vw;*/
+/*    height: 100vh;*/
+/*}*/
 
 .text{
     color: #02f8f8;
@@ -16,7 +16,7 @@
 }
 
 .create {
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
     text-align: center;
     color: #02f8f8;

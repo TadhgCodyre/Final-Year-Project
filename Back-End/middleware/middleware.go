@@ -90,8 +90,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	check := checkAccount(task, collection)
 	if check {
+		log.Println("Login Successful")
 		json.NewEncoder(w).Encode(task)
 	} else {
+		log.Println("Login Failed")
 		http.Error(w, "Wrong Password", 500)
 	}
 

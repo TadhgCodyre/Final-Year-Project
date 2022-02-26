@@ -33,7 +33,8 @@ const QuizSetup = () => {
             NumberQuestions: noQuestions,
             QuestionPool: pool,
             ContributeQuestions: pool,
-            QuickResponses: quick };
+            QuickResponses: quick
+        };
 
         console.log(quiz);
 
