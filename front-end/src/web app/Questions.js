@@ -4,9 +4,11 @@ import * as React from 'react';
 import {Form, Tab} from "semantic-ui-react";
 
 const Questions = () => {
-    const quiz = new Map();
-    let questionMap = [];
+    const [question, setQuestion] = useState('');
+    const [answer, setAnswer] = useState('');
+    const [response, setResponse] = useState('');
 
+    // Getting the user submitted information
     const state = {
         name: localStorage.getItem("name"),
         noRounds: parseInt(localStorage.getItem("noRounds")),
@@ -16,16 +18,9 @@ const Questions = () => {
         quick: localStorage.getItem("quick")
     };
 
-    //let questions = [];
-    const [question, setQuestion] = useState('');
-    const [answer, setAnswer] = useState('');
-    const [response, setResponse] = useState('');
-
-    //let questionArray = [];
-
+    //
     const TabExampleBasic = () => <Tab panes={setupRounds()} onTabChange={() => {
         Array.from(document.querySelectorAll("input")).forEach(input => (input.value = ""));
-
         Array.from(document.querySelectorAll('input[type=radio]:checked')).forEach(response => response.checked = false);
     }}/>
 
@@ -33,13 +28,10 @@ const Questions = () => {
         const panes = [];
 
         for (let j = 1; j < state.noRounds+1; j++) {
-            // Array.from(document.querySelectorAll("input")).forEach(
-            //     input => (input.value = "")
-            // )
             panes.push(
                 {menuItem: 'Round '+j, render: () =>
                         <Tab.Pane>
-                            {setupQuestions(j)}
+                            {makeQuestions(j)}
                         </Tab.Pane>
                 }
             );
@@ -48,7 +40,7 @@ const Questions = () => {
         return panes
     }
 
-    const setupQuestions = (j) => {
+    const makeQuestions = (j) => {
         const questions = [];
 
         for (let i = 1; i < state.noQuestions+1; i++) {
@@ -138,6 +130,7 @@ const Questions = () => {
         return answerArray;
     }
 
+    // Parses response object
     const setupResponses = () => {
         // Gets all the responses from the radios
         const correctResponse = [];
@@ -149,15 +142,16 @@ const Questions = () => {
         for (const val of Object.values(response)) {
             correctResponse.push(parseInt(val.toString().slice(val.length - 1))-1);
         }
-        //console.log("correctResponses: ", correctResponse);
 
         // Populate arrays with false answers
         for (let i = 0; i < (state.noQuestions*state.noRounds); i++) {
+            // Create the necessary response arrays
             responseMap.set(i, [false, false, false, false]);
+
+            // Temporary array to hold response array
             let temp = responseMap.get(i);
 
             // Set correct answer
-            //console.log("temp[correctResponse[i]]: ", temp[correctResponse[i]]);
             temp[correctResponse[i]] = !temp[correctResponse[i]];
 
             // Return to map
@@ -167,29 +161,104 @@ const Questions = () => {
         return responseMap;
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    // Parses answers object
+    const setupAnswers = () => {
+        const answerMap = new Map();
+        let answerArray = [];
 
-        //console.log(response)
-        const responseArray = setupResponses()
-        const answerMap = setupAnswers();
-        //console.log(answer);
-
-        // Get questions from question object
-        // Parse into respective rounds
-        let questionTrack = 0;
+        let qTrack = 0;
         let roundTrack = 0;
-        for (const val of Object.values(question)) {
-            questionMap.push(val);
-            questionTrack += 1;
+        for (const val of Object.values(answer)) {
+            answerArray.push(val);
+            qTrack += 1;
 
-            if ((questionTrack % state.noQuestions === 0) && (questionTrack !== 0)) {
-                quiz.set(roundTrack, questionMap);
-                questionMap = [];
+            if ((qTrack % 4 === 0) && (qTrack !== 0)) {
+                answerMap.set(roundTrack, answerArray);
+                answerArray = [];
                 roundTrack += 1;
             }
         }
-        //console.log(quiz)
+
+        return answerMap
+    }
+
+    // Parses questions object
+    const setupQuestions = () => {
+        const questionMap = new Map();
+
+        // Parse into respective rounds
+        let questionTrack = 0;
+        // Go through each value in question object
+        for (const val of Object.values(question)) {
+            questionMap.set(questionTrack, val);
+            questionTrack += 1;
+        }
+
+        return questionMap;
+    }
+
+    // Combines answer and response maps into one
+    const combineAnswerResponse = (responseMap, answerMap) => {
+        // Combine the answer and response maps into one
+        const answerResponseMap = new Map();
+
+        for (let i = 0; i < (state.noQuestions*state.noRounds); i++) {
+            let tempAnswer = answerMap.get(i);
+            let tempResponse = responseMap.get(i);
+            let tempMap = new Map();
+
+            for (let j = 0; j < 4; j++) {
+                //console.log(tempMap);
+                tempMap.set(tempAnswer[j], tempResponse[j]);
+            }
+
+            answerResponseMap.set(i, tempMap);
+        }
+        //console.log(Object.fromEntries(answerResponseMap));
+
+        return answerResponseMap;
+    }
+
+    // Combines Questions, Answer and Responses into one map
+    const combineQuestionAnswerResponse = (questionMap, answerResponseMap) => {
+        const questionAnswerResponseMap = new Map();
+        for(let i = 0; i < (state.noQuestions*state.noRounds); i++) {
+            let tempMap = new Map();
+            tempMap.set(questionMap.get(i), answerResponseMap.get(i));
+            questionAnswerResponseMap.set(i, tempMap);
+        }
+        //console.log(Object.fromEntries(questionAnswerResponseMap));
+
+        return questionAnswerResponseMap;
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        // Functions to get questions, answers and responses from their respective objects
+        const responseMap = setupResponses()
+        const answerMap = setupAnswers();
+        const questionMap = setupQuestions();
+
+        const answerResponseMap = combineAnswerResponse(responseMap, answerMap);
+        const questionAnswerResponseMap = combineQuestionAnswerResponse(questionMap, answerResponseMap);
+
+        const quiz = new Map();
+        let tempArray = [];
+        let roundTrack = 0;
+        let questionTrack = 0;
+        for (const [key, val] of questionAnswerResponseMap.entries()) {
+            tempArray.push(val);
+            questionTrack += 1;
+
+            if ((questionTrack % state.noQuestions === 0) && (questionTrack !== 0)) {
+                quiz.set(roundTrack, tempArray)
+                tempArray = [];
+                roundTrack += 1;
+            }
+        }
+        console.log(quiz);
+        console.log(JSON.stringify(quiz));
 
         // fetch('http://localhost:9090/api/quiz-setup', {
         //     method: 'POST',
@@ -200,10 +269,6 @@ const Questions = () => {
         //     //go to next page
         //     //window.location.replace("/quizSetup")
         // })
-    }
-
-    const setupAnswers = () => {
-
     }
 
     return (
