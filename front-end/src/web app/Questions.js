@@ -8,6 +8,10 @@ const Questions = () => {
     const [answer, setAnswer] = useState('');
     const [response, setResponse] = useState('');
 
+    let answerArray = [];
+    let questionArray = [];
+    let responseArray = [];
+
     // Getting the user submitted information
     const state = {
         name: localStorage.getItem("name"),
@@ -157,118 +161,118 @@ const Questions = () => {
             // Return to map
             responseMap.set(i, temp);
         }
-
-        return responseMap;
+        return Array.from(responseMap.values());
     }
 
     // Parses answers object
     const setupAnswers = () => {
         const answerMap = new Map();
-        let answerArray = [];
+        let answers = [];
 
         let qTrack = 0;
         let roundTrack = 0;
         for (const val of Object.values(answer)) {
-            answerArray.push(val);
+            answers.push(val);
             qTrack += 1;
 
             if ((qTrack % 4 === 0) && (qTrack !== 0)) {
-                answerMap.set(roundTrack, answerArray);
-                answerArray = [];
+                answerMap.set(roundTrack, answers);
+                answers = [];
                 roundTrack += 1;
             }
         }
 
-        return answerMap
+        return Array.from(answerMap.values());
     }
 
     // Parses questions object
     const setupQuestions = () => {
-        const questionMap = new Map();
+        const questions = [];
 
         // Parse into respective rounds
         let questionTrack = 0;
         // Go through each value in question object
         for (const val of Object.values(question)) {
-            questionMap.set(questionTrack, val);
+            questions.push(val);
             questionTrack += 1;
         }
 
-        return questionMap;
+        return questions;
     }
 
     // Combines answer and response maps into one
-    const combineAnswerResponse = (responseMap, answerMap) => {
+    const combineQuestionsAnswerResponse = () => {
         // Combine the answer and response maps into one
-        const answerResponseMap = new Map();
+        const answerResponseJSON = [{ "name": state.name }];
 
-        for (let i = 0; i < (state.noQuestions*state.noRounds); i++) {
-            let tempAnswer = answerMap.get(i);
-            let tempResponse = responseMap.get(i);
-            let tempMap = new Map();
-
-            for (let j = 0; j < 4; j++) {
-                //console.log(tempMap);
-                tempMap.set(tempAnswer[j], tempResponse[j]);
-            }
-
-            answerResponseMap.set(i, tempMap);
+        for (let i = 0; i < (state.noRounds); i++) {
+            answerResponseJSON.push(
+                {
+                    ["Round"+i]: handleJSON()
+                }
+            );
         }
+
         //console.log(Object.fromEntries(answerResponseMap));
 
-        return answerResponseMap;
+        return answerResponseJSON;
     }
 
-    // Combines Questions, Answer and Responses into one map
-    const combineQuestionAnswerResponse = (questionMap, answerResponseMap) => {
-        const questionAnswerResponseMap = new Map();
-        for(let i = 0; i < (state.noQuestions*state.noRounds); i++) {
-            let tempMap = new Map();
-            tempMap.set(questionMap.get(i), answerResponseMap.get(i));
-            questionAnswerResponseMap.set(i, tempMap);
-        }
-        //console.log(Object.fromEntries(questionAnswerResponseMap));
+    const handleJSON = () => {
+        const json = [];
 
-        return questionAnswerResponseMap;
+        for (let j = 0; j < (state.noQuestions); j++) {
+            let tempAnswer = answerArray.shift();
+            let tempResponse = responseArray.shift();
+            json.push(
+                [{
+                    ["Question"+j]: [{
+                        [questionArray.shift()]: [
+                            {
+                                "Answer1": tempAnswer[0],
+                                "Response1": tempResponse[0]
+                            },
+                            {
+                                "Answer2": tempAnswer[1],
+                                "Response2": tempResponse[1]
+                            },
+                            {
+                                "Answer3": tempAnswer[2],
+                                "Response3": tempResponse[2]
+                            },
+                            {
+                                "Answer4": tempAnswer[3],
+                                "Response4": tempResponse[3]
+                            }
+                        ]
+                    }]
+                }]
+            );
+        }
+
+        return json
     }
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         // Functions to get questions, answers and responses from their respective objects
-        const responseMap = setupResponses()
-        const answerMap = setupAnswers();
-        const questionMap = setupQuestions();
+        responseArray = setupResponses()
+        answerArray = setupAnswers();
+        questionArray = setupQuestions();
 
-        const answerResponseMap = combineAnswerResponse(responseMap, answerMap);
-        const questionAnswerResponseMap = combineQuestionAnswerResponse(questionMap, answerResponseMap);
+        const questionAnswerResponseJSON = combineQuestionsAnswerResponse();
+        console.log(JSON.stringify(questionAnswerResponseJSON));
 
-        const quiz = new Map();
-        let tempArray = [];
-        let roundTrack = 0;
-        let questionTrack = 0;
-        for (const [key, val] of questionAnswerResponseMap.entries()) {
-            tempArray.push(val);
-            questionTrack += 1;
-
-            if ((questionTrack % state.noQuestions === 0) && (questionTrack !== 0)) {
-                quiz.set(roundTrack, tempArray)
-                tempArray = [];
-                roundTrack += 1;
-            }
-        }
-        console.log(quiz);
-        console.log(JSON.stringify(quiz));
-
-        // fetch('http://localhost:9090/api/quiz-setup', {
-        //     method: 'POST',
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify(submit)
-        // }).then(() => {
-        //     console.log('new blog added');
-        //     //go to next page
-        //     //window.location.replace("/quizSetup")
-        // })
+        fetch('http://localhost:9090/api/quiz-setup', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(questionAnswerResponseJSON)
+        }).then(() => {
+            console.log('new quiz added');
+            //go to next page
+            //window.location.replace("/quizSetup")
+        })
     }
 
     return (

@@ -107,15 +107,28 @@ func QuizSetup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 
-	var quiz models.Quiz
-	_ = json.NewDecoder(r.Body).Decode(&quiz)
-	fmt.Println(quiz)
+	var quiz []map[string]interface{}
+	err := json.NewDecoder(r.Body).Decode(&quiz)
+	if err != nil {
+		panic(err)
+	}
 
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
 	addQuiz(quiz, collection)
 	json.NewEncoder(w).Encode(quiz)
+}
+
+func addQuiz(quiz []map[string]interface{}, collection *mongo.Collection) {
+	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
+		{Key: "quiz", Value: quiz},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult.InsertedID)
 }
 
 // Encrypts plaintext into ciphertext
@@ -167,18 +180,6 @@ func checkAccount(account models.QuizMaster, collection *mongo.Collection) bool 
 	} else {
 		return true
 	}
-}
-
-func addQuiz(quiz models.Quiz, collection *mongo.Collection) {
-	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
-		{Key: "name", Value: quiz.Name},
-		{Key: "question", Value: quiz.Questions},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult.InsertedID)
 }
 
 // Reads the config file for mongo connect string
