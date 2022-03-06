@@ -22,7 +22,6 @@ const Questions = () => {
         quick: localStorage.getItem("quick")
     };
 
-    //
     const TabExampleBasic = () => <Tab panes={setupRounds()} onTabChange={() => {
         Array.from(document.querySelectorAll("input")).forEach(input => (input.value = ""));
         Array.from(document.querySelectorAll('input[type=radio]:checked')).forEach(response => response.checked = false);
@@ -203,7 +202,7 @@ const Questions = () => {
     // Combines answer and response maps into one
     const combineQuestionsAnswerResponse = () => {
         // Combine the answer and response maps into one
-        const answerResponseJSON = [{ "name": state.name }];
+        const answerResponseJSON = [];
 
         for (let i = 0; i < (state.noRounds); i++) {
             answerResponseJSON.push(
@@ -264,16 +263,21 @@ const Questions = () => {
         const questionAnswerResponseJSON = combineQuestionsAnswerResponse();
         console.log(JSON.stringify(questionAnswerResponseJSON));
 
+        const submit = {
+            quizName: state.name,
+            quiz: questionAnswerResponseJSON
+        }
+
         fetch('http://localhost:9090/api/quiz-setup', {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(questionAnswerResponseJSON)
+            body: JSON.stringify(submit),
         }).then(() => {
             console.log('new quiz added');
             //go to next page
-            //window.location.replace("/quizSetup")
-        })
-    }
+            window.location.replace("/quiz");
+        });
+    };
 
     return (
         <div className="create">

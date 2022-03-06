@@ -9,6 +9,7 @@ import SignUp from "./web app/SignUp";
 import SignIn from "./web app/SignIn";
 import QuizSetup from "./web app/QuizSetup";
 import Questions from "./web app/Questions";
+import Quiz from "./web app/Quiz"
 
 function App() {
     return (
@@ -31,6 +32,9 @@ function App() {
                       </Route>
                       <Route exact path={"/questions"}>
                           <Questions />
+                      </Route>
+                      <Route exact path={"/quiz"}>
+                          <Quiz />
                       </Route>
                   </Switch>
               </div>

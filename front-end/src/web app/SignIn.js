@@ -22,7 +22,7 @@ const SignIn = () => {
                 localStorage.setItem("username", email.substring(0, email.indexOf("@")))
                 window.location.replace("/quizSetup")
             }
-        })
+        });
     }
 
     return (

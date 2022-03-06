@@ -36,8 +36,6 @@ const QuizSetup = () => {
             QuickResponses: quick
         };
 
-        console.log(quiz);
-
         localStorage.setItem("name", quiz.Name, );
         localStorage.setItem("noRounds", quiz.NumberRounds.toString());
         localStorage.setItem("noQuestions", quiz.NumberQuestions.toString());
@@ -45,7 +43,20 @@ const QuizSetup = () => {
         localStorage.setItem("contribute", quiz.ContributeQuestions.toString());
         localStorage.setItem("quick", quiz.QuickResponses.toString());
 
-        window.location.replace("/questions")
+        fetch('http://localhost:9090/api/create-quiz', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(quiz.Name)
+        }).then((response) => {
+            if (!response.ok) {
+                alert("Failed to create quiz")
+            } else {
+                console.log("quiz created")
+                window.location.replace("/questions")
+            }
+        });
+
+
     };
 
     return (
