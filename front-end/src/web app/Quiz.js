@@ -1,13 +1,9 @@
 import React, {useEffect, useState} from "react";
 import "./account.css"
-import Button from "react-bootstrap/Button";
-import {Form, Tab} from "semantic-ui-react";
+import {Button, Form, Tab, Input} from "semantic-ui-react";
 import axios from 'axios';
-import usePromise from "react-promise";
 
 const Quiz = () => {
-    //const [quizGlobal, setQuiz] = useState([]);
-    //let quizGlobal = [];
     const state = {
         quizName: localStorage.getItem("name"),
         username: localStorage.getItem("username"),
@@ -15,16 +11,15 @@ const Quiz = () => {
         noQuestions: parseInt(localStorage.getItem("noQuestions")),
     };
 
-    //const [isPending, setIsPending] = useState(false);
     const [quizData, setQuiz] = useState([]);
-    //let quizGlobal = [];
+    const [userName, setUsername] = useState('');
+    const [response, setResponse] = useState('');
+    const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
         getQuiz();
     }, []);
 
-    //const [render, setRender] = useState(false);
-    //let quizArray = [];
     const getQuiz = () => {
         axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.quizName)).then((response) => {
             if (response.status === 500) {
@@ -34,11 +29,7 @@ const Quiz = () => {
             }
         }).then((jsonResponse) => {
             // Need to parse through the json data into a usable object
-            //console.log(jsonResponse);
             setQuiz(handleRounds(jsonResponse.Quiz))
-            //setQuiz({data: handleRounds(jsonResponse.Quiz)});
-            // quizArray = handleRounds(jsonResponse.Quiz);
-            //setIsPending(true);
         }).catch((err) => {
             console.log(err);
         });
@@ -98,103 +89,161 @@ const Quiz = () => {
 
     const setupRounds = () => {
         const panes = [];
-        let temp = []
+        let temp = [];
+        let questions = [];
 
         if (quizData && quizData.length) {
             temp = quizData;
 
-            let j = 1
             for (const val of Object.values(temp)) {
+                questions.push(val);
+            }
+
+            for (let j = 0; j < state.noRounds; j++) {
                 panes.push(
                     {
                         menuItem: 'Round ' + j, render: () =>
                             <Tab.Pane>
-                                {makeQuestions(val, j)}
+                                {makeQuestions(questions[j], j)}
                             </Tab.Pane>
                     }
                 );
-                j += 1;
             }
         }
 
         return panes;
     }
 
-    const makeQuestions = (value, j) => {
-        //console.log("test")
-        //console.log({question});
+    const makeQuestions = (value, roundTrack) => {
         const questions = [];
-        //console.log({value})
 
-        // let j = 0;
-        // let i = 0;
-        //console.log(question);
-        //questions.push(question)
         let i = 1;
+        let questionTrack = 0;
         for (const [questionName, answerResponse] of value) {
+            // Holds answers for current question
+            const currentAnswers= []
+            // Holds responses for current question
+            const currentResponses = []
+
+            // answerResponse hold answers and response in a single array
+            for (let z = 0; z < 4; z++){
+                let k = 0;
+                for(const response of Object.values(answerResponse[z])) {
+                    if (k % 2 === 0) {
+                        currentAnswers.push(response);
+                    } else {
+                        currentResponses.push(response);
+                    }
+                    k += 1;
+                }
+            }
+
             questions.push(
                 <Form>
                     <Form.Field
                         label={"Question " + i + ": "+questionName}
-                        name={"Round" + j + "Question" + i}
+                        name={"Round" + roundTrack + "Question" + questionTrack}
                     />
                     <Form.Group widths={"equal"}>
-                         {makeAnswers(answerResponse, i, j)}
-                    </Form.Group>
-                    <Form.Group>
-                        {/* <label>Response</label> */}
-                        {/* {makeRadios(i, j)} */}
+                        <Button.Group>
+                            {makeAnswers(currentAnswers, currentResponses, questionTrack, roundTrack)}
+                        </Button.Group>
                     </Form.Group>
                 </Form>
             );
             questions.map(question =>
-                <li key={j}>{question}</li>);
-
+                <li key={questionTrack}>{question}</li>);
+            // answerTrack += 1;
             i += 1;
+            questionTrack += 1;
         }
 
         return questions;
     }
 
-    // const makeRadios = (i, j) => {
-    //     const radioArray = [];
+    const onChangeValue = (event) => {
+        setResponse({
+            ...response,
+            [event.target.id]: event.target.value
+        });
+    }
 
-    //     for (let z = 1; z < 5; z++) {
-    //         radioArray.push(
-    //             <Form.Radio
-    //                 label={'Answer '+z}
-    //                 type={"radio"}
-    //                 id={"Round"+j+"Question"+i+"AnswerResponse"+z}
-    //                 name={"Round"+j+"Question"+i+"AnswerResponse"}
-    //                 //checked={response1}
-    //                 onChange={(e) => {onChangeValue(e)}}
-    //             />
-    //         );
-    //         radioArray.map(response =>
-    //             <li key={z}>{response}</li>);
-    //     }
-    //     return radioArray;
-    // }
-
-    const makeAnswers = (answerResponse, i, j) => {
+    const makeAnswers = (currentAnswer, currentResponse, i, j) => {
+        // Returned for rendering
         const answers = [];
-        for(const [answer, response] of Object.entries(answerResponse[0])) {
-            console.log({answer});
-            console.log({response});
-        }
 
-        for (let z = 1; z < 5; z++){
+        for (let z = 0; z < 4; z++){
             answers.push(
-                <Form.Button
-                    fluid label={'Answer '+z}
-                    name={"Round"+j+"Question"+i+"Answer"+z}
-                />
+                <Button
+                    inverted color='teal'
+                    id={"Round"+j+"Question"+i+"Response"}
+                    value={currentResponse[z]}
+                    onClick={(e) => {onChangeValue(e)}}
+                >{""+currentAnswer[z]}</Button>
             );
             answers.map(answer =>
                 <li key={z}>{answer}</li>);
         }
-
         return answers;
+    }
+
+    const handleSubmit = () => {
+        let score = 0;
+        console.log(response);
+        for (const val of Object.values(response)) {
+            if (val === "true") {
+                score += 1;
+            }
+        }
+
+        const submit = {
+            "QuizName": state.username,
+            "UserName": userName,
+            "Score": score
+        }
+
+        axios.post('http://localhost:9090/api/add-participant', JSON.stringify(submit)).then((response) => {
+            if (response.status !== 200) {
+                alert("Couldn't submit results");
+            } else {
+                console.log(response)
+            }
+            //console.log(response)
+        })
+
+        setIsPending(true);
+    }
+
+    const quiz = () => {
+        return (
+            <div>
+                {TabExampleBasic()}
+                <br/>
+                <Input type='text' placeholder='Username' action onChange={(event => {setUsername(event.target.value)})}>
+                    <input />
+                    <Button type='submit' onClick={(e => {handleSubmit()})}>Submit Questions</Button>
+                </Input>
+            </div>
+        );
+    }
+
+    const leaderboard = () => {
+        // axios.post('http://localhost:9090/api/get-participants', JSON.stringify(state.quizName)).then((response) => {
+        //     if (response.status === 500) {
+        //         alert("Couldn't retrieve the quiz");
+        //     } else {
+        //         return response.data;
+        //     }
+        // }).then((jsonResponse) => {
+        //     // Need to parse through the json data into a usable object
+        //
+        // }).catch((err) => {
+        //     console.log(err);
+        // });
+
+        return (
+            <p>Testing</p>
+        )
     }
 
 
@@ -202,12 +251,8 @@ const Quiz = () => {
         <div className={"create"}>
             <h2>Welcome to {state.quizName}</h2>
             <h2>Created by {state.username}</h2>
-            {/*{!render ? <Button onClick={() => getQuiz().then(data => {*/}
-            {/*    quizGlobal = data})}>Start Quiz</Button> : setTimeout(TabExampleBasic(), 0)}*/}
-            {/*{!isPending && <Button onClick={getQuiz}>Start Quiz</Button>}*/}
-            {/*{isPending && TabExampleBasic()}*/}
-            {/*{TabExampleBasic()}*/}
-            {TabExampleBasic()}
+            {!isPending && quiz()}
+            {isPending && leaderboard()}
         </div>
     )
 }

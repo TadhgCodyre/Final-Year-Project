@@ -14,7 +14,21 @@ type QuizMaster struct {
 //}
 
 type Quiz struct {
-	ID   primitive.ObjectID `bson:"_id,omitempty"`
-	name string
-	Quiz []map[string]interface{} `bson:"question,omitempty"`
+	ID       primitive.ObjectID       `bson:"_id,omitempty"`
+	QuizName string                   `bson:"quizName,omitempty"`
+	Quiz     []map[string]interface{} `bson:"quiz,omitempty"`
+}
+
+type Participant struct {
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	QuizName string             `bson:"quizName,omitempty"`
+	UserName string             `bson:"userName,omitempty"`
+	Score    int                `bson:"score,omitempty"`
+}
+
+// ReturnQuiz Used for getting the quiz from the database
+type ReturnQuiz struct {
+	ID       primitive.ObjectID         `bson:"_id,omitempty"`
+	QuizName string                     `bson:"quizName,omitempty"`
+	Quiz     [][]map[string]interface{} `bson:"quiz,omitempty"`
 }

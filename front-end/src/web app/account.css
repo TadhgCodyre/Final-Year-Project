@@ -39,7 +39,30 @@
     display: flex;
 }
 
-/*.create .ui.attached.tabular.menu{*/
-/*    background: #cb0bec;*/
-/*    color: #02f8f8;*/
-/*}*/
+.create .ui.bottom.attached.segment.active.tab{
+    background: #cb0bec;
+    color: #02f8f8;
+    border: #02f8f8;
+}
+
+.create ::selection{
+    background-color: #cb0bec;
+}
+
+.create .ui.button, .ui.action.input>.button, .ui.action.input>.buttons {
+    background: purple;
+    color: #02f8f8;
+}
+
+.create a, label{
+    color: #02f8f8 !important;
+}
+
+.create .ui.tabular.menu .active.item {
+    background-color: rgb(203, 11, 236);
+}
+
+.create .ui.form input:not([type]), .ui.form input[type=date], .ui.form input[type=datetime-local], .ui.form input[type=email], .ui.form input[type=file], .ui.form input[type=number], .ui.form input[type=password], .ui.form input[type=search], .ui.form input[type=tel], .ui.form input[type=text], .ui.form input[type=time], .ui.form input[type=url]{
+    background-color: purple;
+    color: white;
+}
