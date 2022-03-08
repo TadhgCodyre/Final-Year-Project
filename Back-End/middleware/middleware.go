@@ -112,8 +112,6 @@ func CreateQuiz(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	fmt.Println("quizName", quizName)
-
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
@@ -139,7 +137,6 @@ func GetQuiz(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(name)
 
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
@@ -166,6 +163,7 @@ func AddParticipant(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println(participant)
 
 	collection := client.Database("TableQuiz").Collection("Quiz")
@@ -173,22 +171,6 @@ func AddParticipant(w http.ResponseWriter, r *http.Request) {
 
 	setParticipant(participant, collection)
 	json.NewEncoder(w).Encode(r.Body)
-}
-
-// Adds the participant and their score to the database
-func setParticipant(participant models.Participant, collection *mongo.Collection) {
-	update := bson.D{{"$push", bson.D{
-		{"participants", bson.D{
-			{"userName", participant.UserName},
-			{"score", participant.Score}}}}}}
-
-	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"quizName": participant.QuizName}, update)
-	if err != nil {
-		log.Print(err)
-		//return false
-	}
-
-	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult)
 }
 
 // QuizSetup Sends quiz details to database
@@ -210,6 +192,58 @@ func QuizSetup(w http.ResponseWriter, r *http.Request) {
 
 	updateQuiz(quiz, collection)
 	json.NewEncoder(w).Encode(r.Body)
+}
+
+func GetParticipants(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.Method)
+	client := connectDatabase()
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+
+	var quizName string
+	err := json.NewDecoder(r.Body).Decode(&quizName)
+	if err != nil {
+		panic(err)
+	}
+
+	collection := client.Database("TableQuiz").Collection("Quiz")
+	fmt.Println("Collection instance created!")
+
+	participants, err := getParticipants(quizName, collection)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Couldn't retrieve quiz", 500)
+	} else {
+		json.NewEncoder(w).Encode(participants)
+	}
+}
+
+func getParticipants(quizName string, collection *mongo.Collection) (models.ReturnQuiz, error) {
+	var returnedQuiz models.ReturnQuiz
+	err := collection.FindOne(ctx, bson.M{"quizName": quizName}).Decode(&returnedQuiz)
+	if err != nil {
+		log.Print(err)
+		return models.ReturnQuiz{}, err
+	}
+
+	fmt.Println(returnedQuiz.Participants)
+	return returnedQuiz, nil
+}
+
+// Adds the participant and their score to the database
+func setParticipant(participant models.Participant, collection *mongo.Collection) {
+	update := bson.D{{"$push", bson.D{
+		{"participants", bson.D{
+			{participant.UserName, participant.Score}}}}}}
+
+	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"quizName": participant.QuizName}, update)
+	if err != nil {
+		log.Print(err)
+		//return false
+	}
+
+	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult.ModifiedCount)
 }
 
 func getQuiz(quizName string, collection *mongo.Collection) (models.ReturnQuiz, error) {

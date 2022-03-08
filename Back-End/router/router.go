@@ -16,6 +16,6 @@ func Router() *mux.Router {
 	router.HandleFunc("/api/get-quiz", middleware.GetQuiz).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/create-quiz", middleware.CreateQuiz).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/add-participant", middleware.AddParticipant).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/get-participants", middleware.AddParticipant).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/get-participants", middleware.GetParticipants).Methods("POST", "OPTIONS")
 	return router
 }

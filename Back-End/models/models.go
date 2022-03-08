@@ -28,7 +28,8 @@ type Participant struct {
 
 // ReturnQuiz Used for getting the quiz from the database
 type ReturnQuiz struct {
-	ID       primitive.ObjectID         `bson:"_id,omitempty"`
-	QuizName string                     `bson:"quizName,omitempty"`
-	Quiz     [][]map[string]interface{} `bson:"quiz,omitempty"`
+	ID           primitive.ObjectID         `bson:"_id,omitempty"`
+	QuizName     string                     `bson:"quizName,omitempty"`
+	Quiz         [][]map[string]interface{} `bson:"quiz,omitempty"`
+	Participants []interface{}              `bson:"participants,omitempty"`
 }

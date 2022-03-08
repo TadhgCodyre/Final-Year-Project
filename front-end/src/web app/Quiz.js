@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import "./account.css"
 import {Button, Form, Tab, Input} from "semantic-ui-react";
 import axios from 'axios';
+import Leaderboard from "./Leaderboard";
 
 const Quiz = () => {
     const state = {
@@ -187,7 +188,7 @@ const Quiz = () => {
         return answers;
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         let score = 0;
         console.log(response);
         for (const val of Object.values(response)) {
@@ -197,12 +198,12 @@ const Quiz = () => {
         }
 
         const submit = {
-            "QuizName": state.username,
+            "QuizName": state.quizName,
             "UserName": userName,
             "Score": score
         }
 
-        axios.post('http://localhost:9090/api/add-participant', JSON.stringify(submit)).then((response) => {
+        await axios.post('http://localhost:9090/api/add-participant', JSON.stringify(submit)).then((response) => {
             if (response.status !== 200) {
                 alert("Couldn't submit results");
             } else {
@@ -221,30 +222,31 @@ const Quiz = () => {
                 <br/>
                 <Input type='text' placeholder='Username' action onChange={(event => {setUsername(event.target.value)})}>
                     <input />
-                    <Button type='submit' onClick={(e => {handleSubmit()})}>Submit Questions</Button>
+                    <Button type='submit' onClick={(handleSubmit)}>Submit Questions</Button>
                 </Input>
             </div>
         );
     }
 
-    const leaderboard = () => {
-        // axios.post('http://localhost:9090/api/get-participants', JSON.stringify(state.quizName)).then((response) => {
-        //     if (response.status === 500) {
-        //         alert("Couldn't retrieve the quiz");
-        //     } else {
-        //         return response.data;
-        //     }
-        // }).then((jsonResponse) => {
-        //     // Need to parse through the json data into a usable object
-        //
-        // }).catch((err) => {
-        //     console.log(err);
-        // });
-
-        return (
-            <p>Testing</p>
-        )
-    }
+    // const leaderboard = () => {
+    //     // axios.post('http://localhost:9090/api/get-participants', JSON.stringify(state.quizName)).then((response) => {
+    //     //     if (response.status === 500) {
+    //     //         alert("Couldn't retrieve the quiz");
+    //     //     } else {
+    //     //         return response.data;
+    //     //     }
+    //     // }).then((jsonResponse) => {
+    //     //     // Need to parse through the json data into a usable object
+    //     //
+    //     // }).catch((err) => {
+    //     //     console.log(err);
+    //     // });
+    //
+    //     // return (
+    //     //     <p>Testing</p>
+    //     // )
+    //     <Leaderboard />
+    // }
 
 
     return (
@@ -252,7 +254,7 @@ const Quiz = () => {
             <h2>Welcome to {state.quizName}</h2>
             <h2>Created by {state.username}</h2>
             {!isPending && quiz()}
-            {isPending && leaderboard()}
+            {isPending && <Leaderboard />}
         </div>
     )
 }

@@ -66,3 +66,13 @@
     background-color: purple;
     color: white;
 }
+
+.create .ui.table thead th {
+    background-color: purple;
+    color: #02f8f8;
+}
+
+.create  .ui.table {
+    background-color: #cb0bec;
+    color: #02f8f8;
+}
