@@ -28,25 +28,24 @@ const QuizSetup = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const quiz = {
-            Name: name,
+            QuizName: name,
             NumberRounds: noRounds,
             NumberQuestions: noQuestions,
             QuestionPool: pool,
             ContributeQuestions: pool,
-            QuickResponses: quick
+            QuickResponses: quick,
+            PIN: ''+Math.floor(1000 + Math.random() * 9000)
         };
 
-        localStorage.setItem("name", quiz.Name, );
+        localStorage.setItem("name", quiz.QuizName, );
         localStorage.setItem("noRounds", quiz.NumberRounds.toString());
         localStorage.setItem("noQuestions", quiz.NumberQuestions.toString());
-        localStorage.setItem("pool", quiz.QuestionPool.toString());
-        localStorage.setItem("contribute", quiz.ContributeQuestions.toString());
-        localStorage.setItem("quick", quiz.QuickResponses.toString());
+        localStorage.setItem("pin", quiz.PIN);
 
         fetch('http://localhost:9090/api/create-quiz', {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(quiz.Name)
+            body: JSON.stringify(quiz)
         }).then((response) => {
             if (!response.ok) {
                 alert("Failed to create quiz")

@@ -106,8 +106,8 @@ func CreateQuiz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 
-	var quizName string
-	err := json.NewDecoder(r.Body).Decode(&quizName)
+	var quiz models.InitialQuiz
+	err := json.NewDecoder(r.Body).Decode(&quiz)
 	if err != nil {
 		log.Println(err)
 	}
@@ -115,10 +115,10 @@ func CreateQuiz(w http.ResponseWriter, r *http.Request) {
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
-	check := createQuiz(quizName, collection)
+	check := createQuiz(quiz, collection)
 	if check {
 		log.Println("Quiz Created")
-		json.NewEncoder(w).Encode(quizName)
+		json.NewEncoder(w).Encode(quiz)
 	} else {
 		log.Println("Failed to create quiz")
 		http.Error(w, "Wrong Password", 500)
@@ -187,6 +187,8 @@ func QuizSetup(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	fmt.Println(quiz)
+
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
@@ -216,6 +218,42 @@ func GetParticipants(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Couldn't retrieve quiz", 500)
 	} else {
 		json.NewEncoder(w).Encode(participants)
+	}
+}
+
+func CheckPIN(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.Method)
+	client := connectDatabase()
+	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+
+	var pin string
+	err := json.NewDecoder(r.Body).Decode(&pin)
+	if err != nil {
+		panic(err)
+	}
+
+	collection := client.Database("TableQuiz").Collection("Quiz")
+	fmt.Println("Collection instance created!")
+
+	err = checkPin(pin, collection)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Wrong PIN entered", 500)
+	} else {
+		json.NewEncoder(w).Encode(pin)
+	}
+}
+
+func checkPin(pin string, collection *mongo.Collection) error {
+	//var returnedAccount []bson.M
+	var returnedQuiz models.ReturnQuiz
+	err := collection.FindOne(ctx, bson.M{"pin": pin}).Decode(&returnedQuiz)
+	if err != nil {
+		return err
+	} else {
+		return nil
 	}
 }
 
@@ -259,7 +297,7 @@ func getQuiz(quizName string, collection *mongo.Collection) (models.ReturnQuiz, 
 }
 
 func updateQuiz(quiz models.Quiz, collection *mongo.Collection) {
-	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"quizName": quiz.QuizName}, bson.D{{"$push", bson.D{{"quiz", quiz.Quiz}}}})
+	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"pin": quiz.PIN}, bson.D{{"$push", bson.D{{"quiz", quiz.Quiz}}}})
 	if err != nil {
 		log.Print(err)
 		//return false
@@ -268,9 +306,15 @@ func updateQuiz(quiz models.Quiz, collection *mongo.Collection) {
 	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult)
 }
 
-func createQuiz(name string, collection *mongo.Collection) bool {
+func createQuiz(quiz models.InitialQuiz, collection *mongo.Collection) bool {
 	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
-		{Key: "quizName", Value: name},
+		{Key: "quizName", Value: quiz.QuizName},
+		{Key: "noRounds", Value: quiz.NumberRounds},
+		{Key: "noQuestions", Value: quiz.NumberQuestions},
+		{Key: "pool", Value: quiz.QuestionPool},
+		{Key: "contribute", Value: quiz.ContributeQuestions},
+		{Key: "quick", Value: quiz.QuickResponses},
+		{Key: "pin", Value: quiz.PIN},
 	})
 	if err != nil {
 		log.Println(err)

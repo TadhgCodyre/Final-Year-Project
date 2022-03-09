@@ -8,6 +8,7 @@ const Quiz = () => {
     const state = {
         quizName: localStorage.getItem("name"),
         username: localStorage.getItem("username"),
+        pin: localStorage.getItem("pin"),
         noRounds: parseInt(localStorage.getItem("noRounds")),
         noQuestions: parseInt(localStorage.getItem("noQuestions")),
     };
@@ -49,7 +50,6 @@ const Quiz = () => {
 
         // Turn the double array into a singular one
         for (let i = 0; i < state.noQuestions; i++) {
-            //console.log(quizTemp);
             quiz = quizTemp;
         }
 
@@ -57,7 +57,6 @@ const Quiz = () => {
         for (let roundTrack = 0; roundTrack < state.noRounds; roundTrack++) {
             quizArray.push(handleQuestions(((quiz[0])[roundTrack])));
         }
-        //console.log({quizArray});
         return quizArray;
     }
 
@@ -73,7 +72,6 @@ const Quiz = () => {
         for (let questionTrack = 0; questionTrack < state.noQuestions; questionTrack++) {
             let answerArray = [];
             for (const value1 of Object.values((roundArray[questionTrack])[0])) {
-                //console.log({key1});
                 // Always zero
                 answerArray = value1[0];
             }
@@ -154,7 +152,6 @@ const Quiz = () => {
             );
             questions.map(question =>
                 <li key={questionTrack}>{question}</li>);
-            // answerTrack += 1;
             i += 1;
             questionTrack += 1;
         }
@@ -209,7 +206,6 @@ const Quiz = () => {
             } else {
                 console.log(response)
             }
-            //console.log(response)
         })
 
         setIsPending(true);
@@ -228,31 +224,12 @@ const Quiz = () => {
         );
     }
 
-    // const leaderboard = () => {
-    //     // axios.post('http://localhost:9090/api/get-participants', JSON.stringify(state.quizName)).then((response) => {
-    //     //     if (response.status === 500) {
-    //     //         alert("Couldn't retrieve the quiz");
-    //     //     } else {
-    //     //         return response.data;
-    //     //     }
-    //     // }).then((jsonResponse) => {
-    //     //     // Need to parse through the json data into a usable object
-    //     //
-    //     // }).catch((err) => {
-    //     //     console.log(err);
-    //     // });
-    //
-    //     // return (
-    //     //     <p>Testing</p>
-    //     // )
-    //     <Leaderboard />
-    // }
-
 
     return (
         <div className={"create"}>
             <h2>Welcome to {state.quizName}</h2>
             <h2>Created by {state.username}</h2>
+            <h3>PIN: {state.pin}</h3>
             {!isPending && quiz()}
             {isPending && <Leaderboard />}
         </div>

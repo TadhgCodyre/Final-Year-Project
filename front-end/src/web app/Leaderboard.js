@@ -67,13 +67,6 @@ const Leaderboard = () => {
 
         console.log(participantsMap);
 
-
-        // for (const [key, value] of Object.entries(participantsArray[i])) {
-        //     console.log(key)
-        //     console.log(value);
-        //     i += i;
-        // }
-
         return tableArray;
     }
 

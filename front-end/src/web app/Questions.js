@@ -15,11 +15,9 @@ const Questions = () => {
     // Getting the user submitted information
     const state = {
         name: localStorage.getItem("name"),
+        pin: localStorage.getItem("pin"),
         noRounds: parseInt(localStorage.getItem("noRounds")),
         noQuestions: parseInt(localStorage.getItem("noQuestions")),
-        pool: localStorage.getItem("pool"),
-        contribute: localStorage.getItem("contribute"),
-        quick: localStorage.getItem("quick")
     };
 
     const TabExampleBasic = () => <Tab panes={setupRounds()} onTabChange={() => {
@@ -264,8 +262,8 @@ const Questions = () => {
         console.log(JSON.stringify(questionAnswerResponseJSON));
 
         const submit = {
-            quizName: state.name,
-            quiz: questionAnswerResponseJSON
+            PIN: state.pin,
+            Quiz: questionAnswerResponseJSON
         }
 
         fetch('http://localhost:9090/api/quiz-setup', {
