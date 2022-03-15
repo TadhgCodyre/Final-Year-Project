@@ -46,29 +46,29 @@ const Questions = () => {
 
         for (let i = 1; i < state.noQuestions+1; i++) {
             questions.push(
-                    <Form>
-                        {/*<label>Question {i + 1}</label>*/}
-                        <Form.Input
-                            fluid label={"Question "+i}
-                            type={"text"}
-                            name={"Round"+j+"Question" + i}
-                            //required
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                setQuestion({
-                                    ...question,
-                                    [e.target.name]: value
-                                });
-                            }}
-                        />
-                        <Form.Group widths={"equal"}>
-                            {makeAnswers(i, j)}
-                        </Form.Group>
-                        <Form.Group>
-                            <label>Response</label>
-                            {makeRadios(i, j)}
-                        </Form.Group>
-                    </Form>
+                <Form>
+                    {/*<label>Question {i + 1}</label>*/}
+                    <Form.Input
+                        fluid label={"Question "+i}
+                        type={"text"}
+                        name={"Round"+j+"Question" + i}
+                        //required
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setQuestion({
+                                ...question,
+                                [e.target.name]: value
+                            });
+                        }}
+                    />
+                    <Form.Group widths={"equal"}>
+                        {makeAnswers(i, j)}
+                    </Form.Group>
+                    <Form.Group>
+                        {/*<label>Response</label>*/}
+                        {makeRadios(i, j)}
+                    </Form.Group>
+                </Form>
             );
             questions.map(question =>
                 <li key={j}>{question}</li>);
@@ -82,14 +82,14 @@ const Questions = () => {
 
         for (let z = 1; z < 5; z++) {
             radioArray.push(
-                <Form.Radio
-                    label={'Answer '+z}
-                    type={"radio"}
+                <Form.Button
+                    //type={"radio"}#
+                    inverted color='teal'
                     id={"Round"+j+"Question"+i+"AnswerResponse"+z}
                     name={"Round"+j+"Question"+i+"AnswerResponse"}
                     //checked={response1}
-                    onChange={(e) => {onChangeValue(e)}}
-                />
+                    onClick={(e) => {onChangeValue(e)}}
+                >{"Answer "+z}</Form.Button>
             );
             radioArray.map(response =>
                 <li key={z}>{response}</li>);
@@ -253,13 +253,15 @@ const Questions = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        console.log(response)
+
         // Functions to get questions, answers and responses from their respective objects
         responseArray = setupResponses()
         answerArray = setupAnswers();
         questionArray = setupQuestions();
 
         const questionAnswerResponseJSON = combineQuestionsAnswerResponse();
-        console.log(JSON.stringify(questionAnswerResponseJSON));
+        console.log(questionAnswerResponseJSON);
 
         const submit = {
             PIN: state.pin,

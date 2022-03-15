@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import "./account.css"
 import {Button, Form, Tab, Input} from "semantic-ui-react";
 import axios from 'axios';
-import Leaderboard from "./Leaderboard";
 
 const Quiz = () => {
     const state = {
@@ -206,6 +205,8 @@ const Quiz = () => {
             } else {
                 console.log(response)
             }
+
+            window.location.replace("/leaderboard");
         })
 
         setIsPending(true);
@@ -230,8 +231,9 @@ const Quiz = () => {
             <h2>Welcome to {state.quizName}</h2>
             <h2>Created by {state.username}</h2>
             <h3>PIN: {state.pin}</h3>
-            {!isPending && quiz()}
-            {isPending && <Leaderboard />}
+            {quiz()}
+            {/*{!isPending && quiz()}*/}
+            {/*{isPending && <Leaderboard />}*/}
         </div>
     )
 }

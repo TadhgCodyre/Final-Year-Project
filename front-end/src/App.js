@@ -10,6 +10,7 @@ import SignIn from "./web app/SignIn";
 import QuizSetup from "./web app/QuizSetup";
 import Questions from "./web app/Questions";
 import Quiz from "./web app/Quiz"
+import Leaderboard from "./web app/Leaderboard";
 
 function App() {
     return (
@@ -35,6 +36,9 @@ function App() {
                       </Route>
                       <Route exact path={"/quiz"}>
                           <Quiz />
+                      </Route>
+                      <Route exact path={"/leaderboard"}>
+                          <Leaderboard />
                       </Route>
                   </Switch>
               </div>
