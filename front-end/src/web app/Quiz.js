@@ -214,8 +214,7 @@ const Quiz = () => {
 
     const quiz = () => {
         return (
-            <div>
-                {TabExampleBasic()}
+            <div className={"bill"}>
                 <br/>
                 <Input type='text' placeholder='Username' action onChange={(event => {setUsername(event.target.value)})}>
                     <input />
@@ -231,6 +230,7 @@ const Quiz = () => {
             <h2>Welcome to {state.quizName}</h2>
             <h2>Created by {state.username}</h2>
             <h3>PIN: {state.pin}</h3>
+            {TabExampleBasic()}
             {quiz()}
             {/*{!isPending && quiz()}*/}
             {/*{isPending && <Leaderboard />}*/}

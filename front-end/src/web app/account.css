@@ -57,6 +57,10 @@
     color: #02f8f8;
 }
 
+.bill {
+    margin-right: 150px;
+}
+
 .create a, label{
     color: #02f8f8 !important;
 }

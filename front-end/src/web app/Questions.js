@@ -52,7 +52,7 @@ const Questions = () => {
                         fluid label={"Question "+i}
                         type={"text"}
                         name={"Round"+j+"Question" + i}
-                        //required
+                        required
                         onChange={(e) => {
                             const value = e.target.value;
                             setQuestion({
@@ -85,6 +85,7 @@ const Questions = () => {
                 <Form.Button
                     //type={"radio"}#
                     inverted color='teal'
+                    required
                     id={"Round"+j+"Question"+i+"AnswerResponse"+z}
                     name={"Round"+j+"Question"+i+"AnswerResponse"}
                     //checked={response1}
@@ -113,7 +114,7 @@ const Questions = () => {
                 <Form.Input
                     fluid label={'Answer '+z}
                     name={"Round"+j+"Question"+i+"Answer"+z}
-                    //required
+                    required
                     type={"text"}
                     onChange={(e) => {
                         const value = e.target.value;
