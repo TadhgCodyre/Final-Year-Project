@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"Final-Year-Project/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -379,12 +378,16 @@ func checkAccount(account models.QuizMaster, collection *mongo.Collection) bool 
 // Reads the config file for mongo connect string
 func readFile() map[string]interface{} {
 	file, err := ioutil.ReadFile("../utils/config.yaml")
-	utils.CheckErr(err)
+	if err != nil {
+		log.Println(err)
+	}
 
 	data := make(map[string]interface{})
 
 	err = yaml.Unmarshal(file, &data)
-	utils.CheckErr(err)
+	if err != nil {
+		log.Println(err)
+	}
 
 	return data
 }
