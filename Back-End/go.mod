@@ -1,4 +1,4 @@
-module Back-End
+module github.com/TadhgCodyre/Final-Year-Project/Back-End
 
 go 1.17
 

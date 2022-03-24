@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"time"
 
-	"Final-Year-Project/Back-End/models"
+	"github.com/TadhgCodyre/Final-Year-Project/Final-Year-Project/Back-End/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
