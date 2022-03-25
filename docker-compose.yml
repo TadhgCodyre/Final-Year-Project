@@ -7,6 +7,7 @@ services:
       - "80:80"
     volumes: 
       - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./front-end/build/:/usr/share/nginx/html
     networks:
       - poolquiz
     depends_on:
@@ -14,9 +15,11 @@ services:
   backend:
     build:
       context:
-        - ./Back-End
+        ./Back-End
     ports:
-      - "8080:8080" 
+      - "9090:9090" 
     networks:
       - poolquiz
       
+networks:
+  poolquiz:
