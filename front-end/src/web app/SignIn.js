@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./account.css"
+import "./environment"
+import {environment} from "./environment";
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
@@ -9,7 +11,7 @@ const SignIn = () => {
         e.preventDefault();
         const account = { email, password};
 
-        fetch('http://localhost:9090/api/sign-in', {
+        fetch(`${environment.apiUrl}/api/sign-in`, {
             method: 'POST',
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: JSON.stringify(account)
