@@ -276,7 +276,7 @@ const Questions = () => {
         }).then(() => {
             console.log('new quiz added');
             //go to next page
-            window.location.replace("/quiz");
+            window.location.replace("/leaderboard");
         });
     };
 

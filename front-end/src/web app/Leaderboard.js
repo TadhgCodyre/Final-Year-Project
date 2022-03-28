@@ -6,8 +6,10 @@ import axios from 'axios';
 const Leaderboard = () => {
     const state = {
         quizName: localStorage.getItem("name"),
+        pin: localStorage.getItem("pin"),
     };
 
+    const [quizName, setQuizName] = useState('')
     const [participants, setParticipants] = useState([]);
 
     useEffect(() => {
@@ -15,7 +17,7 @@ const Leaderboard = () => {
     }, []);
 
     const getParticipants = async () => {
-        await axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.quizName)).then((response) => {
+        await axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
             if (response.status === 500) {
                 alert("Couldn't retrieve the quiz");
             } else {
@@ -24,6 +26,7 @@ const Leaderboard = () => {
         }).then((jsonResponse) => {
             // Need to parse through the json data into a usable object
             setParticipants(jsonResponse.Participants);
+            setQuizName(jsonResponse.QuizName);
             console.log("test")
         }).catch((err) => {
             console.log(err);
@@ -90,7 +93,7 @@ const Leaderboard = () => {
     return (
         <div className={"create"}>
             <h2>Leaderboard</h2>
-            <h2>Quiz: {state.quizName}</h2>
+            <h2>Quiz: {quizName}</h2>
             {makeLeaderboard()}
         </div>
     )

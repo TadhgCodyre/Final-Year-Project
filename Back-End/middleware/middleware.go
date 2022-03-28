@@ -284,9 +284,9 @@ func setParticipant(participant models.Participant, collection *mongo.Collection
 	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult.ModifiedCount)
 }
 
-func getQuiz(quizName string, collection *mongo.Collection) (models.ReturnQuiz, error) {
+func getQuiz(pin string, collection *mongo.Collection) (models.ReturnQuiz, error) {
 	var returnedQuiz models.ReturnQuiz
-	err := collection.FindOne(ctx, bson.M{"quizName": quizName}).Decode(&returnedQuiz)
+	err := collection.FindOne(ctx, bson.M{"pin": pin}).Decode(&returnedQuiz)
 	if err != nil {
 		log.Print(err)
 		return returnedQuiz, err

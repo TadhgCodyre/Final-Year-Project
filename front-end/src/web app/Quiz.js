@@ -22,7 +22,7 @@ const Quiz = () => {
     }, []);
 
     const getQuiz = () => {
-        axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.quizName)).then((response) => {
+        axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
             if (response.status === 500) {
                 alert("Couldn't retrieve the quiz");
             } else {
