@@ -94,6 +94,7 @@ const Leaderboard = () => {
         <div className={"create"}>
             <h2>Leaderboard</h2>
             <h2>Quiz: {quizName}</h2>
+            <h3>PIN: {state.pin}</h3>
             {makeLeaderboard()}
         </div>
     )
