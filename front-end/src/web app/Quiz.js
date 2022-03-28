@@ -8,11 +8,13 @@ const Quiz = () => {
         quizName: localStorage.getItem("name"),
         username: localStorage.getItem("username"),
         pin: localStorage.getItem("pin"),
-        noRounds: parseInt(localStorage.getItem("noRounds")),
-        noQuestions: parseInt(localStorage.getItem("noQuestions")),
     };
 
     const [quizData, setQuiz] = useState([]);
+    const [noRounds, setNoRounds] = useState(0);
+    const [noQuestions, setNoQuestions] = useState(0);
+    const [quizName, setQuizName] = useState('');
+    const [pin, setPIN] = useState('');
     const [userName, setUsername] = useState('');
     const [response, setResponse] = useState('');
     const [isPending, setIsPending] = useState(false);
@@ -21,8 +23,8 @@ const Quiz = () => {
         getQuiz();
     }, []);
 
-    const getQuiz = () => {
-        axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
+    const getQuiz = async () => {
+        await axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
             if (response.status === 500) {
                 alert("Couldn't retrieve the quiz");
             } else {
@@ -30,10 +32,17 @@ const Quiz = () => {
             }
         }).then((jsonResponse) => {
             // Need to parse through the json data into a usable object
-            setQuiz(handleRounds(jsonResponse.Quiz))
+            setQuiz(handleRounds(jsonResponse.Quiz));
+            setNoRounds(jsonResponse.NumberRounds);
+            setNoQuestions(jsonResponse.NumberQuestions);
+            setQuizName(jsonResponse.QuizName);
+            setPIN(jsonResponse.PIN);
+
+            setIsPending(true);
         }).catch((err) => {
             console.log(err);
         });
+        console.log(pin)
     }
 
     // Parses through json to format it into usable array
@@ -48,12 +57,12 @@ const Quiz = () => {
         }
 
         // Turn the double array into a singular one
-        for (let i = 0; i < state.noQuestions; i++) {
+        for (let i = 0; i < noQuestions; i++) {
             quiz = quizTemp;
         }
 
         // First zero doesn't change
-        for (let roundTrack = 0; roundTrack < state.noRounds; roundTrack++) {
+        for (let roundTrack = 0; roundTrack < noRounds; roundTrack++) {
             quizArray.push(handleQuestions(((quiz[0])[roundTrack])));
         }
         return quizArray;
@@ -68,7 +77,7 @@ const Quiz = () => {
             roundArray = value;
         }
 
-        for (let questionTrack = 0; questionTrack < state.noQuestions; questionTrack++) {
+        for (let questionTrack = 0; questionTrack < noQuestions; questionTrack++) {
             let answerArray = [];
             for (const value1 of Object.values((roundArray[questionTrack])[0])) {
                 // Always zero
@@ -87,17 +96,17 @@ const Quiz = () => {
 
     const setupRounds = () => {
         const panes = [];
-        let temp = [];
+        //let temp = [];
         let questions = [];
 
         if (quizData && quizData.length) {
-            temp = quizData;
+            //temp = quizData;
 
-            for (const val of Object.values(temp)) {
+            for (const val of Object.values(quizData)) {
                 questions.push(val);
             }
 
-            for (let j = 0; j < state.noRounds; j++) {
+            for (let j = 0; j < noRounds; j++) {
                 panes.push(
                     {
                         menuItem: 'Round ' + j, render: () =>
@@ -224,14 +233,23 @@ const Quiz = () => {
         );
     }
 
+    const temp = () => {
+        return (
+            <div>
+                <h2>Welcome to {quizName}</h2>
+                <h2>Created by {userName}</h2>
+                <h3>PIN: {pin}</h3>
+                {TabExampleBasic()}
+                {quiz()}
+            </div>
+        )
+    }
+
 
     return (
         <div className={"create"}>
-            <h2>Welcome to {state.quizName}</h2>
-            <h2>Created by {state.username}</h2>
-            <h3>PIN: {state.pin}</h3>
-            {TabExampleBasic()}
-            {quiz()}
+            {isPending && temp()}
+
             {/*{!isPending && quiz()}*/}
             {/*{isPending && <Leaderboard />}*/}
         </div>

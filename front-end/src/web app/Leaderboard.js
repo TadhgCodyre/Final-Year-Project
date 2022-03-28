@@ -5,7 +5,6 @@ import axios from 'axios';
 
 const Leaderboard = () => {
     const state = {
-        quizName: localStorage.getItem("name"),
         pin: localStorage.getItem("pin"),
     };
 
