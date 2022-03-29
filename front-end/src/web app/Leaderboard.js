@@ -26,7 +26,6 @@ const Leaderboard = () => {
             // Need to parse through the json data into a usable object
             setParticipants(jsonResponse.Participants);
             setQuizName(jsonResponse.QuizName);
-            console.log("test")
         }).catch((err) => {
             console.log(err);
         });

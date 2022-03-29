@@ -22,14 +22,11 @@ const Quiz = () => {
 
     useEffect(() => {
         getQuiz().then(res => {
-            console.log('Im in!');
-            console.log(res.ID)
             setQuiz(handleRounds(res.Quiz));
             setNoRounds(res.NumberRounds);
             setNoQuestions(res.NumberQuestions);
             setQuizName(res.QuizName);
             setPIN(res.PIN);
-            console.log('First this runs');
             setIsPending(true);
         });
     }, [noQuestions]);
@@ -97,7 +94,6 @@ const Quiz = () => {
         const panes = [];
         //let temp = [];
         let questions = [];
-        console.log({quizData});
         //getQuiz().then((res) => console.log(res))
         if (quizData && quizData.length) {
             //temp = quizData;
@@ -195,7 +191,6 @@ const Quiz = () => {
 
     const handleSubmit = async () => {
         let score = 0;
-        console.log(response);
         for (const val of Object.values(response)) {
             if (val === "true") {
                 score += 1;
@@ -203,7 +198,7 @@ const Quiz = () => {
         }
 
         const submit = {
-            "QuizName": state.quizName,
+            "PIN": pin,
             "UserName": partName,
             "Score": score
         }

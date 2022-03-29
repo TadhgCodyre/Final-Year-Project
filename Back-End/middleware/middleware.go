@@ -164,7 +164,7 @@ func AddParticipant(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	fmt.Println(participant)
+	fmt.Println("bruh: ", participant)
 
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
@@ -275,7 +275,7 @@ func setParticipant(participant models.Participant, collection *mongo.Collection
 		{"participants", bson.D{
 			{participant.UserName, participant.Score}}}}}}
 
-	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"quizName": participant.QuizName}, update)
+	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"pin": participant.PIN}, update)
 	if err != nil {
 		log.Print(err)
 		//return false

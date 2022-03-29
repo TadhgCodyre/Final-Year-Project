@@ -32,7 +32,7 @@ type Quiz struct {
 
 type Participant struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	QuizName string             `bson:"quizName,omitempty"`
+	PIN      string             `bson:"quizName,omitempty"`
 	UserName string             `bson:"userName,omitempty"`
 	Score    int                `bson:"score,omitempty"`
 }
