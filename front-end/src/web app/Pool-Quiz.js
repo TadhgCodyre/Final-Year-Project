@@ -8,6 +8,7 @@ import App from "../App";
 class PoolQuiz extends Component {
     render() {
         let pin = '';
+        localStorage.clear()
 
         function handleSubmit() {
             fetch('http://localhost:9090/api/check-pin', {

@@ -1,38 +1,46 @@
 import React, {useEffect, useState} from "react";
 import "./account.css"
-import {Button, Form, Tab, Input} from "semantic-ui-react";
+import {Button, Form, Tab, Input, Segment, Loader, Image, Dimmer} from "semantic-ui-react";
 import axios from 'axios';
 
 const Quiz = () => {
     const state = {
         quizName: localStorage.getItem("name"),
-        username: localStorage.getItem("username"),
+        userName: localStorage.getItem("username"),
         pin: localStorage.getItem("pin"),
-        noRounds: parseInt(localStorage.getItem("noRounds")),
-        noQuestions: parseInt(localStorage.getItem("noQuestions")),
     };
 
     const [quizData, setQuiz] = useState([]);
-    const [userName, setUsername] = useState('');
+    const [noRounds, setNoRounds] = useState('');
+    const [noQuestions, setNoQuestions] = useState('');
+    const [quizName, setQuizName] = useState('');
+    const [pin, setPIN] = useState('');
+
+    const [partName, setPartName] = useState('');
     const [response, setResponse] = useState('');
     const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
-        getQuiz();
-    }, []);
+        getQuiz().then(res => {
+            console.log('Im in!');
+            console.log(res.ID)
+            setQuiz(handleRounds(res.Quiz));
+            setNoRounds(res.NumberRounds);
+            setNoQuestions(res.NumberQuestions);
+            setQuizName(res.QuizName);
+            setPIN(res.PIN);
+            console.log('First this runs');
+            setIsPending(true);
+        });
+    }, [noQuestions]);
 
-    const getQuiz = () => {
-        axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
+    const getQuiz = async () => {
+        return await axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
             if (response.status === 500) {
                 alert("Couldn't retrieve the quiz");
             } else {
                 return response.data;
             }
-        }).then((jsonResponse) => {
-            // Need to parse through the json data into a usable object
-            setQuiz(handleRounds(jsonResponse.Quiz))
-        }).catch((err) => {
-            console.log(err);
         });
     }
 
@@ -48,12 +56,12 @@ const Quiz = () => {
         }
 
         // Turn the double array into a singular one
-        for (let i = 0; i < state.noQuestions; i++) {
+        for (let i = 0; i < noQuestions; i++) {
             quiz = quizTemp;
         }
 
         // First zero doesn't change
-        for (let roundTrack = 0; roundTrack < state.noRounds; roundTrack++) {
+        for (let roundTrack = 0; roundTrack < noRounds; roundTrack++) {
             quizArray.push(handleQuestions(((quiz[0])[roundTrack])));
         }
         return quizArray;
@@ -68,7 +76,7 @@ const Quiz = () => {
             roundArray = value;
         }
 
-        for (let questionTrack = 0; questionTrack < state.noQuestions; questionTrack++) {
+        for (let questionTrack = 0; questionTrack < noQuestions; questionTrack++) {
             let answerArray = [];
             for (const value1 of Object.values((roundArray[questionTrack])[0])) {
                 // Always zero
@@ -87,17 +95,18 @@ const Quiz = () => {
 
     const setupRounds = () => {
         const panes = [];
-        let temp = [];
+        //let temp = [];
         let questions = [];
-
+        console.log({quizData});
+        //getQuiz().then((res) => console.log(res))
         if (quizData && quizData.length) {
-            temp = quizData;
+            //temp = quizData;
 
-            for (const val of Object.values(temp)) {
+            for (const val of Object.values(quizData)) {
                 questions.push(val);
             }
 
-            for (let j = 0; j < state.noRounds; j++) {
+            for (let j = 0; j < noRounds; j++) {
                 panes.push(
                     {
                         menuItem: 'Round ' + j, render: () =>
@@ -195,7 +204,7 @@ const Quiz = () => {
 
         const submit = {
             "QuizName": state.quizName,
-            "UserName": userName,
+            "UserName": partName,
             "Score": score
         }
 
@@ -216,7 +225,7 @@ const Quiz = () => {
         return (
             <div className={"bill"}>
                 <br/>
-                <Input type='text' placeholder='Username' action onChange={(event => {setUsername(event.target.value)})}>
+                <Input type='text' placeholder='Username' action onChange={(event => {setPartName(event.target.value)})}>
                     <input />
                     <Button type='submit' onClick={(handleSubmit)}>Submit Questions</Button>
                 </Input>
@@ -224,18 +233,61 @@ const Quiz = () => {
         );
     }
 
+    const loadQuiz = () => {
+        return (
+            <div>
+                <h2>Welcome to {quizName}</h2>
+                <h2>Created by {state.userName}</h2>
+                <h3>PIN: {pin}</h3>
+                {TabExampleBasic()}
+                {quiz()}
+            </div>
+        )
+    }
 
-    return (
-        <div className={"create"}>
-            <h2>Welcome to {state.quizName}</h2>
-            <h2>Created by {state.username}</h2>
-            <h3>PIN: {state.pin}</h3>
-            {TabExampleBasic()}
-            {quiz()}
-            {/*{!isPending && quiz()}*/}
-            {/*{isPending && <Leaderboard />}*/}
+    const LoaderExampleText = () => (
+        <div>
+            <Segment>
+                <Dimmer active>
+                    <Loader>Loading</Loader>
+                </Dimmer>
+            </Segment>
         </div>
     )
+
+    if(!isPending){
+        return(
+            <div className={"create"}>
+                {LoaderExampleText()}
+
+                {/*{!isPending && quiz()}*/}
+                {/*{isPending && <Leaderboard />}*/}
+            </div>
+        )
+    }
+    else{
+        console.log('Content is ready');
+        return (
+            <div className={"create"}>
+                <h2>Welcome to {quizName}</h2>
+                <h2>Created by {state.userName}</h2>
+                <h3>PIN: {pin}</h3>
+                {TabExampleBasic()}
+                {quiz()}
+            </div>
+        )
+    }
+
+
+    // return (
+    //     <div className={"create"}>
+    //         {!isPending && LoaderExampleText()}
+    //         {isPending && loadQuiz()}
+    //
+    //         {/*{!isPending && quiz()}*/}
+    //         {/*{isPending && <Leaderboard />}*/}
+    //     </div>
+    // )
 }
 
 export default Quiz;
