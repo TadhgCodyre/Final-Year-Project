@@ -240,19 +240,7 @@ const Quiz = () => {
         );
     }
 
-    const loadQuiz = () => {
-        return (
-            <div>
-                <h2>Welcome to {quizName}</h2>
-                <h2>Created by {state.userName}</h2>
-                <h3>PIN: {pin}</h3>
-                {TabExampleBasic()}
-                {quiz()}
-            </div>
-        )
-    }
-
-    const LoaderExampleText = () => (
+    const Loading = () => (
         <div>
             <Segment>
                 <Dimmer active>
@@ -265,10 +253,7 @@ const Quiz = () => {
     if(!isPending){
         return(
             <div className={"create"}>
-                {LoaderExampleText()}
-
-                {/*{!isPending && quiz()}*/}
-                {/*{isPending && <Leaderboard />}*/}
+                {Loading()}
             </div>
         )
     }
@@ -283,17 +268,6 @@ const Quiz = () => {
             </div>
         )
     }
-
-
-    // return (
-    //     <div className={"create"}>
-    //         {!isPending && LoaderExampleText()}
-    //         {isPending && loadQuiz()}
-    //
-    //         {/*{!isPending && quiz()}*/}
-    //         {/*{isPending && <Leaderboard />}*/}
-    //     </div>
-    // )
 }
 
 export default Quiz;
