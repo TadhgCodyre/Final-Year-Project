@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"Final-Year-Project/Back-End/models"
@@ -114,6 +115,16 @@ func CreateQuiz(w http.ResponseWriter, r *http.Request) {
 
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
+
+	// Convert int64 to int
+	if quiz.QuickResponses != 0 {
+		duration, _ := speedResponse(quiz.QuickResponses)
+		tempDuration := strconv.FormatInt(duration.Milliseconds(), 10)
+		quiz.QuickResponses, err = strconv.Atoi(tempDuration)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 
 	check := createQuiz(quiz, collection)
 	if check {
@@ -246,6 +257,17 @@ func CheckPIN(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Convert minutes to milliseconds
+func speedResponse(response int) (time.Duration, error) {
+	duration := strconv.Itoa(response) + "m"
+	milliseconds, err := time.ParseDuration(duration)
+	if err != nil {
+		return 0, err
+	}
+
+	return milliseconds, err
+}
+
 func checkPin(pin string, collection *mongo.Collection) error {
 	//var returnedAccount []bson.M
 	var returnedQuiz models.ReturnQuiz
@@ -292,7 +314,7 @@ func getQuiz(pin string, collection *mongo.Collection) (models.ReturnQuiz, error
 		return returnedQuiz, err
 	}
 
-	fmt.Println(returnedQuiz)
+	fmt.Println(returnedQuiz.QuickResponses)
 	return returnedQuiz, nil
 }
 
@@ -313,7 +335,7 @@ func createQuiz(quiz models.InitialQuiz, collection *mongo.Collection) bool {
 		{Key: "noQuestions", Value: quiz.NumberQuestions},
 		{Key: "pool", Value: quiz.QuestionPool},
 		{Key: "contribute", Value: quiz.ContributeQuestions},
-		{Key: "quick", Value: quiz.QuickResponses},
+		{Key: "duration", Value: quiz.QuickResponses},
 		{Key: "pin", Value: quiz.PIN},
 	})
 	if err != nil {

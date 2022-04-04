@@ -11,7 +11,7 @@ const QuizSetup = () => {
     const [noQuestions, setQuestions] = useState(0);
     const [pool, setPool] = useState(false);
     const [contribute, setContribute] = useState(false);
-    const [quick, setResponse] = useState(false);
+    const [quick, setResponse] = useState(0);
 
     const handlePoolChange = () => {
         setPool(!pool)
@@ -36,6 +36,8 @@ const QuizSetup = () => {
             QuickResponses: quick,
             PIN: ''+Math.floor(1000 + Math.random() * 9000)
         };
+
+        console.log(quiz.QuickResponses);
 
         localStorage.setItem("name", quiz.QuizName, );
         localStorage.setItem("noRounds", quiz.NumberRounds.toString());
@@ -84,6 +86,13 @@ const QuizSetup = () => {
                     value={noQuestions}
                     onChange={(e) => setQuestions(e.target.valueAsNumber)}
                 />
+                <label>Set the length of the quiz (Set to zero to have no timer)</label>
+                <input
+                    type="number"
+                    required
+                    value={quick}
+                    onChange={(e) => setResponse(e.target.valueAsNumber)}
+                />
                 <label>Use Pool of questions?</label>
                 <input
                     type="checkbox"
@@ -95,12 +104,6 @@ const QuizSetup = () => {
                     type="checkbox"
                     checked={contribute}
                     onChange={handleContributeChange}
-                />
-                <label>Encourage Quick Response?</label>
-                <input
-                    type="checkbox"
-                    checked={quick}
-                    onChange={handleResponseChange}
                 />
                 <button>Setup Quiz</button>
             </form>
