@@ -192,15 +192,14 @@ const Quiz = () => {
         return answers;
     }
 
+    // Get the name from the user if they run out of time
     const countDown = () => {
-        let temp = prompt("Ran out of time! Please enter your name: ");
-        // console.log(temp);
-        // setPartName(temp);
-        // console.log("countDown: ", partName);
-        handleSubmit(temp);
+        let name = prompt("Ran out of time! Please enter your name: ");
+        handleSubmit(name);
     }
 
     const handleSubmit = async (name) => {
+
         let score = 0;
         for (const val of Object.values(response)) {
             if (val === "true") {
@@ -277,7 +276,7 @@ const Quiz = () => {
         return (
             <div className={"create"}>
                 <h2>Welcome to {quizName}</h2>
-                <Countdown date={Date.now() + quick} onComplete={countDown}/>
+                <Countdown date={Date.now() + quick} onComplete={countDown} />
                 <h3>PIN: {pin}</h3>
                 {TabExampleBasic()}
                 {quiz()}

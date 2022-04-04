@@ -86,7 +86,7 @@ const QuizSetup = () => {
                     value={noQuestions}
                     onChange={(e) => setQuestions(e.target.valueAsNumber)}
                 />
-                <label>Set the length of the quiz (Set to zero to have no timer)</label>
+                <label>Set the length of the quiz</label>
                 <input
                     type="number"
                     required
