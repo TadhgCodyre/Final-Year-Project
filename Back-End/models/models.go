@@ -20,7 +20,7 @@ type InitialQuiz struct {
 	NumberQuestions     int                `bson:"noQuestions,omitempty"`
 	QuestionPool        bool               `bson:"pool,omitempty"`
 	ContributeQuestions bool               `bson:"contribute,omitempty"`
-	QuickResponses      bool               `bson:"quick,omitempty"`
+	QuickResponses      int                `bson:"quick,omitempty"`
 	PIN                 string             `bson:"pin,omitempty"`
 }
 
@@ -45,7 +45,7 @@ type ReturnQuiz struct {
 	NumberQuestions     int                        `bson:"noQuestions,omitempty"`
 	QuestionPool        bool                       `bson:"pool,omitempty"`
 	ContributeQuestions bool                       `bson:"contribute,omitempty"`
-	QuickResponses      bool                       `bson:"quick,omitempty"`
+	QuickResponses      int                        `bson:"duration,omitempty"`
 	PIN                 string                     `bson:"pin,omitempty"`
 	Quiz                [][]map[string]interface{} `bson:"quiz,omitempty"`
 	Participants        []interface{}              `bson:"participants,omitempty"`

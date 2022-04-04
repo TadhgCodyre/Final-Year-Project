@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import "./account.css"
 import {Button, Form, Tab, Input, Segment, Loader, Image, Dimmer} from "semantic-ui-react";
 import axios from 'axios';
+import Countdown from "react-countdown";
 
 const Quiz = () => {
     const state = {
@@ -15,6 +16,7 @@ const Quiz = () => {
     const [noQuestions, setNoQuestions] = useState('');
     const [quizName, setQuizName] = useState('');
     const [pin, setPIN] = useState('');
+    const [quick, setQuick] = useState('');
 
     const [partName, setPartName] = useState('');
     const [response, setResponse] = useState('');
@@ -27,6 +29,7 @@ const Quiz = () => {
             setNoQuestions(res.NumberQuestions);
             setQuizName(res.QuizName);
             setPIN(res.PIN);
+            setQuick(res.QuickResponses);
             setIsPending(true);
         });
     }, [noQuestions]);
@@ -189,7 +192,14 @@ const Quiz = () => {
         return answers;
     }
 
-    const handleSubmit = async () => {
+    // Get the name from the user if they run out of time
+    const countDown = () => {
+        let name = prompt("Ran out of time! Please enter your name: ");
+        handleSubmit(name);
+    }
+
+    const handleSubmit = async (name) => {
+
         let score = 0;
         for (const val of Object.values(response)) {
             if (val === "true") {
@@ -197,9 +207,11 @@ const Quiz = () => {
             }
         }
 
+        console.log("handleSubmit: "+name);
+
         const submit = {
             "PIN": pin,
-            "UserName": partName,
+            "UserName": name,
             "Score": score
         }
 
@@ -222,7 +234,7 @@ const Quiz = () => {
                 <br/>
                 <Input type='text' placeholder='Username' action onChange={(event => {setPartName(event.target.value)})}>
                     <input />
-                    <Button type='submit' onClick={(handleSubmit)}>Submit Questions</Button>
+                    <Button type='submit' onClick={(event) => handleSubmit(partName)}>Submit Questions</Button>
                 </Input>
             </div>
         );
@@ -261,11 +273,10 @@ const Quiz = () => {
         )
     }
     else{
-        console.log('Content is ready');
         return (
             <div className={"create"}>
                 <h2>Welcome to {quizName}</h2>
-                <h2>Created by {state.userName}</h2>
+                <Countdown date={Date.now() + quick} onComplete={countDown} />
                 <h3>PIN: {pin}</h3>
                 {TabExampleBasic()}
                 {quiz()}
