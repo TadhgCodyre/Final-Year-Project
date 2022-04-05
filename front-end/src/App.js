@@ -12,6 +12,8 @@ import Questions from "./web app/Questions";
 import Quiz from "./web app/Quiz"
 import Leaderboard from "./web app/Leaderboard";
 
+
+// Handles the routing for each page
 function App() {
     return (
       <Router>
