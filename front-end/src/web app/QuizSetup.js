@@ -37,6 +37,11 @@ const QuizSetup = () => {
             PIN: ''+Math.floor(1000 + Math.random() * 9000)
         };
 
+        if (quiz.NumberRounds <= 0 || quiz.NumberQuestions <= 0 || quiz.QuickResponses <= 0) {
+            alert("You entered a invalid value. Please make sure to not include any negative numbers or 0.");
+            window.location.reload();
+        }
+
         console.log(quiz.QuickResponses);
 
         localStorage.setItem("name", quiz.QuizName, );
