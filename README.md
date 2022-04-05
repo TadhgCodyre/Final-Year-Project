@@ -46,8 +46,11 @@ Unit testing is being ran using CircleCI for a CICD environment.
 
 <!-- RUN -->
 ## Run
-- Must first create a config.yaml file inside the utils folder
-- Insert the following code: ```mongo: link to remote or local MongoDB database```
+- Must first create a config.yaml file inside the utils folder.
+- Insert the following code: ```mongo: link to remote or local MongoDB database```.
+- If you are using a local Mongdb instance, enter the localhost address for it instead.
+- To run the Back-End, run ```go run main.go``` inside Back-End folder.
+- To run the Front-End, run ```npm start``` inside front-end folder.
 
 <!-- DECLARATION -->
 ## Declaration
