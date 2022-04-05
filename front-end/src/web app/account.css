@@ -83,3 +83,11 @@
     background-color: #cb0bec;
     color: #02f8f8;
 }
+
+.create .ui.dimmer {
+    background-color: #cb0bec;
+}
+
+.create .ui.dimmer .ui.loader{
+    color: #02f8f8;
+}

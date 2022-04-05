@@ -5,6 +5,7 @@ const SignUp = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    // Sends the new account info to the Back-End
     const handleSubmit = (e) => {
         e.preventDefault();
         const blog = { email, password};

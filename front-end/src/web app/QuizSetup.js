@@ -42,8 +42,6 @@ const QuizSetup = () => {
             window.location.reload();
         }
 
-        console.log(quiz.QuickResponses);
-
         localStorage.setItem("name", quiz.QuizName, );
         localStorage.setItem("noRounds", quiz.NumberRounds.toString());
         localStorage.setItem("noQuestions", quiz.NumberQuestions.toString());

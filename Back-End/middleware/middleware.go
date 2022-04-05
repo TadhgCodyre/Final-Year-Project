@@ -38,8 +38,6 @@ func connectDatabase() *mongo.Client {
 		log.Fatal(err)
 	}
 
-	//defer client.Disconnect(ctx)
-
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
@@ -100,6 +98,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// CreateQuiz creates the quiz using the settings outlined by QuizMaster
 func CreateQuiz(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Method)
 	client := connectDatabase()
@@ -175,8 +174,6 @@ func AddParticipant(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	fmt.Println("bruh: ", participant)
-
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
@@ -198,8 +195,6 @@ func QuizSetup(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	fmt.Println(quiz)
-
 	collection := client.Database("TableQuiz").Collection("Quiz")
 	fmt.Println("Collection instance created!")
 
@@ -207,6 +202,7 @@ func QuizSetup(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(r.Body)
 }
 
+// GetParticipants gets all the participants for the leaderboard
 func GetParticipants(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Method)
 	client := connectDatabase()
@@ -232,6 +228,7 @@ func GetParticipants(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CheckPIN checks PIN supplied by participant
 func CheckPIN(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Method)
 	client := connectDatabase()
@@ -268,6 +265,7 @@ func speedResponse(response int) (time.Duration, error) {
 	return milliseconds, err
 }
 
+// Checks if the pin is valid, returns quiz
 func checkPin(pin string, collection *mongo.Collection) error {
 	//var returnedAccount []bson.M
 	var returnedQuiz models.ReturnQuiz
@@ -279,6 +277,7 @@ func checkPin(pin string, collection *mongo.Collection) error {
 	}
 }
 
+// Gets all the participants for the leaderboard
 func getParticipants(quizName string, collection *mongo.Collection) (models.ReturnQuiz, error) {
 	var returnedQuiz models.ReturnQuiz
 	err := collection.FindOne(ctx, bson.M{"quizName": quizName}).Decode(&returnedQuiz)
@@ -306,6 +305,7 @@ func setParticipant(participant models.Participant, collection *mongo.Collection
 	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult.ModifiedCount)
 }
 
+// Gets the quiz corresponding with the supplied PIN
 func getQuiz(pin string, collection *mongo.Collection) (models.ReturnQuiz, error) {
 	var returnedQuiz models.ReturnQuiz
 	err := collection.FindOne(ctx, bson.M{"pin": pin}).Decode(&returnedQuiz)
@@ -314,10 +314,10 @@ func getQuiz(pin string, collection *mongo.Collection) (models.ReturnQuiz, error
 		return returnedQuiz, err
 	}
 
-	fmt.Println(returnedQuiz.QuickResponses)
 	return returnedQuiz, nil
 }
 
+// Updates quiz with given PIN with questions, answers and responses
 func updateQuiz(quiz models.Quiz, collection *mongo.Collection) {
 	quizMasterResult, err := collection.UpdateOne(ctx, bson.M{"pin": quiz.PIN}, bson.D{{"$push", bson.D{{"quiz", quiz.Quiz}}}})
 	if err != nil {
@@ -328,6 +328,7 @@ func updateQuiz(quiz models.Quiz, collection *mongo.Collection) {
 	fmt.Println("Inserted a Single Quiz Record ", quizMasterResult)
 }
 
+// Sets the initial settings for the quiz
 func createQuiz(quiz models.InitialQuiz, collection *mongo.Collection) bool {
 	quizMasterResult, err := collection.InsertOne(ctx, bson.D{
 		{Key: "quizName", Value: quiz.QuizName},

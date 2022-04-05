@@ -32,8 +32,10 @@ const Quiz = () => {
             setQuick(res.QuickResponses);
             setIsPending(true);
         });
+        // Will only run once noQuestions is changed
     }, [noQuestions]);
 
+    // Gets the quiz with the corresponding PIN
     const getQuiz = async () => {
         return await axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
             if (response.status === 500) {
@@ -72,17 +74,20 @@ const Quiz = () => {
         const questions = new Map();
         let roundArray = [];
 
+        // Gets each round from the quiz
         for (const value of Object.values(quiz)) {
             roundArray = value;
         }
 
+        // Goes through round to get each question
         for (let questionTrack = 0; questionTrack < noQuestions; questionTrack++) {
             let answerArray = [];
             for (const value1 of Object.values((roundArray[questionTrack])[0])) {
-                // Always zero
+                // Will always be the first value in the array
                 answerArray = value1[0];
             }
 
+            // Adds all answers and responses for the question to the questions map
             for (const [key2, value2] of Object.entries(answerArray)) {
                 questions.set(key2, value2);
             }
@@ -91,18 +96,19 @@ const Quiz = () => {
         return questions;
     }
 
-    const TabExampleBasic = () => <Tab panes={setupRounds()}/>
+    // Makes the necessary tabs for each round
+    const makeTabs = () => <Tab panes={setupRounds()}/>
 
+    // Creates the tab for each round of the quiz
     const setupRounds = () => {
         const panes = [];
-        //let temp = [];
         let questions = [];
-        //getQuiz().then((res) => console.log(res))
+        // Will only run if quizData is initialised and greater than length 0
         if (quizData && quizData.length) {
-            //temp = quizData;
-
-            for (const val of Object.values(quizData)) {
-                questions.push(val);
+            console.log({quizData});
+            // Gets each round from quizData
+            for (const round of Object.values(quizData)) {
+                questions.push(round);
             }
 
             for (let j = 0; j < noRounds; j++) {
@@ -120,6 +126,7 @@ const Quiz = () => {
         return panes;
     }
 
+    // Makes the correct number of questions to fill out
     const makeQuestions = (value, roundTrack) => {
         const questions = [];
 
@@ -173,6 +180,7 @@ const Quiz = () => {
         });
     }
 
+    // Each question has 4 possible answers. They created here
     const makeAnswers = (currentAnswer, currentResponse, i, j) => {
         // Returned for rendering
         const answers = [];
@@ -198,16 +206,14 @@ const Quiz = () => {
         handleSubmit(name);
     }
 
+    // Grades the users score and sends it to the Back-End
     const handleSubmit = async (name) => {
-
         let score = 0;
         for (const val of Object.values(response)) {
             if (val === "true") {
                 score += 1;
             }
         }
-
-        console.log("handleSubmit: "+name);
 
         const submit = {
             "PIN": pin,
@@ -240,12 +246,14 @@ const Quiz = () => {
         );
     }
 
+    // Display a loading component until quiz is ready
     const Loading = () => (
         <div>
             <Segment>
-                <Dimmer active>
+                <Dimmer active colou>
                     <Loader>Loading</Loader>
                 </Dimmer>
+                <Image src='https://react.semantic-ui.com/images/wireframe/short-paragraph.png' />
             </Segment>
         </div>
     )
@@ -263,7 +271,7 @@ const Quiz = () => {
                 <h2>Welcome to {quizName}</h2>
                 <Countdown date={Date.now() + quick} onComplete={countDown} />
                 <h3>PIN: {pin}</h3>
-                {TabExampleBasic()}
+                {makeTabs()}
                 {quiz()}
             </div>
         )

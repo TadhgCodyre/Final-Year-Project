@@ -4,7 +4,7 @@ import logo from "../img/logo.png";
 import React from "react";
 import { Link } from "react-router-dom"
 
-
+// The image acts as the navbar, allowing the user to return to the home screen on click
 const Navbar = () => {
     return (
         <nav className={"navbar"}>

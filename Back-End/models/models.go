@@ -30,6 +30,7 @@ type Quiz struct {
 	Quiz []map[string]interface{} `bson:"quiz,omitempty"`
 }
 
+// Participant Used to
 type Participant struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	PIN      string             `bson:"quizName,omitempty"`

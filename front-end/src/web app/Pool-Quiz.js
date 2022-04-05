@@ -10,17 +10,16 @@ class PoolQuiz extends Component {
         let pin = '';
         localStorage.clear()
 
+        // Sends the pin to the Back-End
         function handleSubmit() {
             fetch('http://localhost:9090/api/check-pin', {
                 method: 'POST',
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: JSON.stringify(pin)
             }).then((response) => {
-                console.log(response.ok);
                 if (!response.ok) {
                     alert("Couldn't find quiz with given PIN")
                 } else {
-                    console.log("quiz found")
                     localStorage.setItem("pin", pin)
                     window.location.replace("/quiz")
                 }

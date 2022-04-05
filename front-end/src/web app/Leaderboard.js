@@ -15,6 +15,7 @@ const Leaderboard = () => {
         getParticipants();
     }, []);
 
+    // Gets all the completed participants and their scores for the quiz
     const getParticipants = async () => {
         await axios.post('http://localhost:9090/api/get-quiz', JSON.stringify(state.pin)).then((response) => {
             if (response.status === 500) {
@@ -31,21 +32,25 @@ const Leaderboard = () => {
         });
     }
 
+    // Makes the table to hold all the users and scores
     const makeTableBody = () => {
         const tableArray = [];
         const participantsMap = new Map();
 
+        // Will only run once participants is initialised and greater than 0
         if (participants && participants.length) {
             // Sort json data into usable map
             for (const participant of Object.values(participants)) {
                 participantsMap.set(participant[0].Key, participant[0].Value)
             }
 
+            // Sorts the map into descending order
             participantsMap[Symbol.iterator] = function* () {
                 yield* [...this.entries()].sort((a, b) => b[1] - a[1]);
             }
 
             let i = 0;
+            // For loop to create table to hold all users
             for (const [user, score] of participantsMap) {
                 tableArray.push(
                     <Table.Row>
@@ -65,12 +70,10 @@ const Leaderboard = () => {
             }
         }
 
-
-        console.log(participantsMap);
-
         return tableArray;
     }
 
+    // Makes the leaderboard
     const makeLeaderboard = () => {
         return (
             <Table celled>

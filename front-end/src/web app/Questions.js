@@ -20,11 +20,13 @@ const Questions = () => {
         noQuestions: parseInt(localStorage.getItem("noQuestions")),
     };
 
-    const TabExampleBasic = () => <Tab panes={setupRounds()} onTabChange={() => {
+    // Creates the tabs for inputting the quiz info, clears the input fields on tab change
+    const makeTabs = () => <Tab panes={setupRounds()} onTabChange={() => {
         Array.from(document.querySelectorAll("input")).forEach(input => (input.value = ""));
         Array.from(document.querySelectorAll('input[type=radio]:checked')).forEach(response => response.checked = false);
     }}/>
 
+    // Creates the necessary number of tabs depending on the noRounds
     const setupRounds = () => {
         const panes = [];
 
@@ -41,6 +43,7 @@ const Questions = () => {
         return panes
     }
 
+    // Creates the necessary number of questions per round depending on noQuestions
     const makeQuestions = (j) => {
         const questions = [];
 
@@ -77,6 +80,7 @@ const Questions = () => {
         return questions;
     }
 
+    // Each question has four possible answers, these buttons decide which one is correct
     const makeRadios = (i, j) => {
         const radioArray = [];
 
@@ -98,6 +102,7 @@ const Questions = () => {
         return radioArray;
     }
 
+    // Change the value of the respective button when clicked
     const onChangeValue = (event) => {
         //Array of [event.target.id], get last character, (a number), use this number to set value in boolean array as true
         setResponse({
@@ -106,6 +111,7 @@ const Questions = () => {
         });
     }
 
+    // Each question has four possible answers for the user to set. This is where the text for them are created
     const makeAnswers = (i, j) => {
         const answerArray = [];
 
@@ -134,7 +140,7 @@ const Questions = () => {
 
     // Parses response object
     const setupResponses = () => {
-        // Gets all the responses from the radios
+        // Will hold all the correct responses from the radios
         const correctResponse = [];
 
         // Holds all the arrays with the correct and wrong responses
@@ -211,11 +217,10 @@ const Questions = () => {
             );
         }
 
-        //console.log(Object.fromEntries(answerResponseMap));
-
         return answerResponseJSON;
     }
 
+    // Inserts the quiz info into a json object to send to the database
     const handleJSON = () => {
         const json = [];
 
@@ -251,6 +256,7 @@ const Questions = () => {
         return json
     }
 
+    // Sends the quiz info to the Back-End
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -284,7 +290,7 @@ const Questions = () => {
         <div className="create">
             <h2>Almost there! Just need to enter the questions</h2>
             <h2>{state.name}</h2>
-            {TabExampleBasic()}
+            {makeTabs()}
             <br/>
             <button onClick={handleSubmit}>Setup Quiz</button>
 
