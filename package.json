@@ -1,5 +1,11 @@
 {
   "dependencies": {
     "react-countdown": "^2.3.2"
+  },
+  "devDependencies": {
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.6",
+    "jest": "^28.1.0",
+    "react-test-renderer": "^18.1.0"
   }
 }
